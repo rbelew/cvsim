@@ -200,8 +200,8 @@ if __name__ == '__main__':
 
     recalibrate = True # Whether to run the calibration
     do_plot     = True # Whether to plot results
-    storage = f'sqlite:///example_calibration.db' # Optuna database location
-    verbose = 0.1 # How much detail to print
+    storage     = f'sqlite:///example_calibration.db' # Optuna database location
+    verbose     = 0.1 # How much detail to print
 
     cal = Calibration(storage)
 
