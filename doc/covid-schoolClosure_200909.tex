@@ -1,0 +1,366 @@
+%% LyX 2.3.0 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{achemso}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{setspace}
+\doublespacing
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ urlcolor=black}
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+
+\title{Capturing 35 national school closure interventions in a model of
+COVID-19 diagnoses and deaths }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\numberwithin{equation}{section}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{longtable}
+
+\author{Richard K. Belew}
+\email{rbelew@ucsd.edu}
+\affiliation{Univ. California -- San Diego\\
+La Jolla CA 92093}
+
+\author{Cliff Kerr}
+\email{ckerr@idmod.org}
+\affiliation{Institute for Disease Modeling, Bellevue, WA}
+
+\author{Jasmina Panovska-Griffiths}
+\email{j.panovska-griffiths@ucl.ac.uk}
+\affiliation{University College London}
+
+\author{Dina Mistry}
+\email{dmistry@idmod.org}
+\affiliation{Institute for Disease Modeling, Bellevue, WA}
+
+\SectionNumbersOn
+
+\pagestyle{myheadings}
+\markboth{Modelling school closures - Draft 9 Sept 20}{Modelling school closures - Draft 9 Sept 20}
+
+\DeclareBibliographyCategory{cited}
+\AtEveryCitekey{\addtocategory{cited}{\thefield{entrykey}}}
+
+\usepackage{filecontents}
+
+\nocite{*}
+
+\makeatother
+
+\begin{document}
+\noindent \begin{center}
+\emph{Draft: 9 Sept 20}
+\par\end{center}
+\begin{abstract}
+An individual-based model called Covasim has recently been fit to
+data regarding confirmed cases and deaths experience in the United
+Kingdom during the first half of 2020, and then used it to evaluate
+alternative intervention strategies there \cite{jpg20}. We extend
+this methodology to consider data from 35 other countries, and use
+a database of international intervention specifics called the \href{https://github.com/amel-github/covid19-interventionmeasures}{Covid-19 Control Strategies List}
+to retrospectively model interventions employed in these countries.
+Because the age distribution of populations is a key feature of the
+COVID-19 pandemic and contacts among young people may play an especially
+important role, we focus here on school closure interventions. 
+
+Individual countries varied considerably in both the dates on which
+they imposed school closings, and in the levels (kindergarten, primary,
+secondary, university) specified. Critically, the age-stratefied sub-populations
+supported by Covasim allow fine-grained specification of just which
+individuals are affected by school closures at each educational level.
+Simulations were first run for each of the 35 countries, without the
+intervention, and data on confirmed cases and deaths was used to fit
+key Covasim parameters. Next, specific intervention strategies employed
+by each country were converted into specifications for Covasim, and
+the same simulation parameters fit to a second model with the interventions
+considered. In the 10 countries where there was a significant difference
+between models, those incorporating school closures were considerably
+better fits than those without. Since both models' parameters are
+optimized and evaluated using the same criterion, improved fit with
+the intervention model may be taken as evidence that the modeled intervention
+is useful, at least in these 10 countries, in describing observed
+data.
+\end{abstract}
+
+\section{Introduction}
+
+\paragraph*{\{pearce20\}: Comparisons between countries are essential for the
+control of COVID-19}
+
+\begin{quotation}
+
+Although international comparisons are often disparaged because of
+different data quality and fears of the \textquoteleft ecological
+fallacy\textquoteright , if done carefully they can play a major role
+in our learning what works best for controlling COVID-19. \cite{10.1093/ije/dyaa108}
+
+... the COVID-19 epidemic shows the need for epidemiology to go back
+to its roots---thinking about populations. Studying disease occurrence
+by person, place and time (often referred to as \textquoteleft descriptive
+epidemiology\textquoteright ) is usually taught in introductory courses,
+even if this approach is then paid little attention subsequently.
+COVID-19 is a striking example of how we can learn a great deal from
+comparing countries, states, regions, time trends and persons, despite
+of all the difficulties. \cite{10.1093/ije/dyaa108}
+
+\end{quotation}
+
+With travel restrictions as they are in 2020, levels of migration
+across national borders are considerably smaller than that across
+state or provincial boundries. In some countries, school closures
+were ordered only within particular states. For these reasons, and
+given the data currently available, only models at the level of individual
+countries and interventions ordered nationally are considered here. 
+
+\paragraph*{\{Jewell20\}: Predictive Mathematical Models of the COVID-19 Pandemic:
+Underlying Principles and Value of Projections}
+
+\begin{quotation}
+
+Predictive models for large countries, such as the US, are even more
+problematic because they aggregate heterogeneous subepidemics in local
+areas.... Models should also seek to use the best possible data for
+local predictions. \cite{10.1001/jama.2020.6585}
+
+\end{quotation}
+
+\section{Results}
+
+For each country the goal of Covasim optimization is to minimize the
+difference between the model and data about the number of diagnosed
+cases of, and deaths caused by, COVID. The objective measure used
+for optimization is to minimize sum-squared-difference (SSD) ``fit
+value'' between both of these. As data regarding deaths is believed
+to generally more accurate than that about positive tests, SSD over
+death rates is weighted twice that of diagnoses. 
+
+Figure \ref{fig:All-country-statistics} shows the results for all
+35 countries. Visual inspection of the model vs. data curves (see
+below) suggests that fit values > 1000 reflect poor model fit; these
+have been highlighted for both plain and school closure conditions.
+Here we are interested in the difference between two models, one incorporating
+school closure interventions and one without these. Figure \ref{fig:Improved-fit}
+shows the range of differences in the fit value between these two
+conditions. These differences can be very large when both models have
+poor fit (Taiwan, North Macedonia, Hungary). For most countries, the
+difference is small, < 150. In the 10 countries where there was a
+significant difference between models, those incorporating school
+closures were considerably better fits than those without.\footnote{This is the sentence that needs most statistical work around ``significant''
+and ``better fit''!}
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[width=0.8\paperwidth]{figs/comp-no:intrvn_200902}
+\par\end{centering}
+\caption{\label{fig:All-country-statistics}All country statistics}
+\end{figure}
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[width=0.75\paperwidth]{figs/improvedFit-annote}
+\par\end{centering}
+\caption{\label{fig:Improved-fit}Improved fit}
+\end{figure}
+
+Figure \ref{fig:Sample-countries} shows the curves for Malaysia and
+New Zealand, two countries with large improvements in model fit, and
+Switzerland which demonstates a smaller difference in fit. The Malaysian
+model with school closures uses a smaller value for beta (3.000E-3
+vs. 3.004E-3) and a much larger initial number of infected (4713 vs.
+112); New Zealand shows a similar adjustment.
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[height=0.8\paperheight]{figs/sampleCountries}
+\par\end{centering}
+\caption{\label{fig:Sample-countries}Sample countries}
+\end{figure}
+
+
+\section{Methods}
+
+\subsection{Data sources}
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[height=3in]{figs/dataSources}
+\par\end{centering}
+\caption{\label{fig:Data-sources}Data sources}
+\end{figure}
+
+\begin{itemize}
+\item OurWorldInData \cite{owidcoronavirus}
+\item \href{https://github.com/amel-github/covid19-interventionmeasures}{Covid-19 Control Strategies List},
+developed by Amélie Desvars-Larrive and colleagues {[}\href{https://www.csh.ac.at}{Complexity Science Hub Vienna}{]} 
+\end{itemize}
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[height=3in]{figs/educ_intervene-uniq}
+\par\end{centering}
+\caption{\label{fig:Intervention-dates-and}Intervention dates and educational
+levels}
+
+\end{figure}
+
+
+\subsection{Covasim}
+
+Covasim \cite{Kerr2020.05.10.20097469}
+
+Optuna \cite{10.1145/3292500.3330701}
+
+Tree-Structured Parzen Estimator \cite{10.1145/3377930.3389817}
+
+CMAEvolution \cite{hansen2016cma}
+
+Did not make use of SynthPop
+
+\subsection{Key details}
+\begin{itemize}
+\item \texttt{self.weights = sc.mergedicts(\{'cum\_deaths':10, 'cum\_diagnoses':5\},
+weights)}
+\item \texttt{educLevelSize = \{'h':4, 'w':20, 'c':20, 'sk': 20, 'sp': 20,
+'ss': 40 , 'su': 80\}}
+\item Only countries with populations > 1e6 were considered.
+\item Only countries with educational interventions coming after at least
+one week of diagnoses and death data were considered. For example,
+while both Ghana and Mauritius had school closures, but data on diagnoses
+and deaths was not available for a week before the dates of their
+closures.
+\item Simulation start date picked when number of infections becomes > 50
+\item Each educational level (kindergarten, primary, secondary, university)
+was treated as a separate ``layer'' by Covasim and captured into
+separate age ranges within the total population. This allows interventions
+at different educational levels to be treated independently. 
+\item Each school closure at any educational level is modeled as a simple
+on/off: school closings start on a specified date, infection rate
+was set very low (\texttt{ClosedSchoolBeta = 0.02}) for children in
+each age group associated with the educational level, and are assumed
+to be in effect until an end-of-closure date.
+\item In a small number (6 of 35) of cases, the Covid-19 Control Strategies
+List contained a specific \emph{end} for the school closure; for these
+countries that date was used to end the intervention. Otherwise, a
+default \texttt{SchoolOutDate = 2020-06-01} was used.
+\end{itemize}
+
+\subsection{Age distribution}
+\begin{itemize}
+\item \texttt{educLevel\_ages = \{'sk': {[}4,5{]}, 'sp': {[}6,10{]}, 'ss': {[}11,18{]},
+'su': {[}19,24{]}\}}
+\end{itemize}
+The distinguished age cohorts associated with school levels is shown
+in Figure 
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[width=0.8\paperwidth]{figs/Malaysia-people}
+\par\end{centering}
+\caption{\label{fig:PopAgeDist}Population age distribution}
+\end{figure}
+
+
+\subsection{Estimating background testing rates}
+
+All models of an epidemic that attempt to account for positive diagnoses
+must have data, or make assumptions, about the context of \emph{testing}
+within which the positive results are obtained. For example, Covasim
+has different parameters specifying the assumed testing levels of
+symptomatic vs. non-symptomatic individuals. Following a suggestion
+from Roser et al:
+
+\begin{quotation}
+
+Perhaps the biggest challenge in thinking about testing is that the
+number of tests performed depends on a country\textquoteright s testing
+strategy---that is, how many people a country intends to test given
+its context.... Some testing strategies focus on high-risk groups
+such as health care workers or high-risk locations such as nursing
+homes. Strategies that focus on those at the highest risk will result
+in a lower number of tests performed per confirmed case, meaning countries
+will know less about of the true magnitude of the outbreak in the
+community at large.... In general, a high number of \emph{tests per
+death} is preferable because it indicates widespread testing and assessment
+of community transmission. \cite{owidcoronavirus}, identify-covid-exemplars
+
+\end{quotation}
+
+Our model bases each country's assumed testing rate on data regarding
+tests per death. Most countries captured in OWID data report the number
+of \emph{tests performed}, but a smaller fraction (8 of 35) report
+instead the number of \emph{individuals tested}\footnote{https://ourworldindata.org/coronavirus\#acknowledgements}.
+Relating one or the other to reported deaths and to a country's population
+gives a rate of testing across time. Figure \ref{fig:Testing-rates}
+shows the \emph{final}, most recent rate of testing for each country. 
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[width=0.8\paperwidth]{figs/testRates}
+\par\end{centering}
+\caption{\label{fig:Testing-rates}Testing rates}
+\end{figure}
+
+We then make the optimistic assumption that this final level of testing
+has been going on constantly throughout 2020. That is, we take the
+final per-country tests-per-death measure as an \emph{upper bound}
+on how much testing has actually occurred, and from which the diagnosis
+data is drawn. This is certainly a crude assumption, and optimistically
+imagines an abundance of testing providing statistical stability for
+observed positive diagnoses. Nevertheless, it does allow per-country
+levels of testing to be varied reasonably. As Figure \ref{fig:Testing-rates}
+shows, these per-country estimates vary over two orders of magnitude,
+but the estimates based on individual vs. on test reported data are
+similar.
+
+\subsection{Model optimization using Optuna}
+
+We optimize over two parameters, $\beta$ and $\mathrm{\mathbf{initialInfect}}$,
+the date of initial infection. Both TFE and CMAES samplers were used,
+and NTrial=100 trials were allocated to find the search for parameter
+values causing the model to best fit the data.
+
+\section{Next steps}
+
+\subsection{Model validation}
+\begin{enumerate}
+\item \{lauerReich20\}: Infectious Disease Forecasting for Public Health
+\cite{lauerReich20}
+\item \{bergmeir18\}:A note on the validity of cross-validation for evaluating
+autoregressive time series prediction \cite{bergmeir18}
+\item \{bergmeirBenitez12\}: On the use of cross-validation for time series
+predictor evaluation \cite{bergmeirBenitez12}
+\end{enumerate}
+
+\subsection{Integration of genomic data: molecular epidemiology}
+\begin{itemize}
+\item Rockett \cite{Rockett:2020uf}
+\begin{enumerate}
+\item examine the added value of near real-time genome sequencing of SARS-CoV-2
+in a subpopulation of infected patients during the first 10 weeks
+of COVID-19 containment in Australia and compare findings from genomic
+surveillance with predictions of a computational agent-based model
+(ABM)
+\item based on AceMOD
+\item 21 January and 28 March 2020, 1,617 cases of COVID- 19 were diagnosed
+and reported to the NSW Ministry of Health. All patients resided in
+metropolitan Sydney. 
+\end{enumerate}
+\end{itemize}
+\pagebreak{}
+
+\bibliographystyle{plain}
+\bibliography{covid}
+
+\end{document}

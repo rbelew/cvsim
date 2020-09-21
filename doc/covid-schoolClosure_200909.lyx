@@ -1,0 +1,1256 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass achemso
+\begin_preamble
+\usepackage{longtable}
+
+\author{Richard K. Belew}
+\email{rbelew@ucsd.edu}
+\affiliation{Univ. California -- San Diego\\
+La Jolla CA 92093}
+
+\author{Cliff Kerr}
+\email{ckerr@idmod.org}
+\affiliation{Institute for Disease Modeling, Bellevue, WA}
+
+\author{Jasmina Panovska-Griffiths}
+\email{j.panovska-griffiths@ucl.ac.uk}
+\affiliation{University College London}
+
+\author{Dina Mistry}
+\email{dmistry@idmod.org}
+\affiliation{Institute for Disease Modeling, Bellevue, WA}
+
+\SectionNumbersOn
+
+\pagestyle{myheadings}
+\markboth{Modelling school closures - Draft 9 Sept 20}{Modelling school closures - Draft 9 Sept 20}
+
+\DeclareBibliographyCategory{cited}
+\AtEveryCitekey{\addtocategory{cited}{\thefield{entrykey}}}
+
+\usepackage{filecontents}
+
+\nocite{*}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing double
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "urlcolor=black"
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\notefontcolor #0000ff
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Capturing 35 national school closure interventions in a model of COVID-19
+ diagnoses and deaths 
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+
+\emph on
+Draft: 9 Sept 20
+\end_layout
+
+\begin_layout Abstract
+An individual-based model called Covasim has recently been fit to data regarding
+ confirmed cases and deaths experience in the United Kingdom during the
+ first half of 2020, and then used it to evaluate alternative intervention
+ strategies there 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jpg20"
+literal "false"
+
+\end_inset
+
+.
+ We extend this methodology to consider data from 35 other countries, and
+ use a database of international intervention specifics called the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Covid-19 Control Strategies List"
+target "https://github.com/amel-github/covid19-interventionmeasures"
+literal "false"
+
+\end_inset
+
+ to retrospectively model interventions employed in these countries.
+ Because the age distribution of populations is a key feature of the COVID-19
+ pandemic and contacts among young people may play an especially important
+ role, we focus here on school closure interventions.
+ 
+\end_layout
+
+\begin_layout Abstract
+Individual countries varied considerably in both the dates on which they
+ imposed school closings, and in the levels (kindergarten, primary, secondary,
+ university) specified.
+ Critically, the age-stratefied sub-populations supported by Covasim allow
+ fine-grained specification of just which individuals are affected by school
+ closures at each educational level.
+ Simulations were first run for each of the 35 countries, without the interventi
+on, and data on confirmed cases and deaths was used to fit key Covasim parameter
+s.
+ Next, specific intervention strategies employed by each country were converted
+ into specifications for Covasim, and the same simulation parameters fit
+ to a second model with the interventions considered.
+ In the 10 countries where there was a significant difference between models,
+ those incorporating school closures were considerably better fits than
+ those without.
+ Since both models' parameters are optimized and evaluated using the same
+ criterion, improved fit with the intervention model may be taken as evidence
+ that the modeled intervention is useful, at least in these 10 countries,
+ in describing observed data.
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Paragraph*
+{pearce20}: Comparisons between countries are essential for the control
+ of COVID-19
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Although international comparisons are often disparaged because of different
+ data quality and fears of the ‘ecological fallacy’, if done carefully they
+ can play a major role in our learning what works best for controlling COVID-19.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1093/ije/dyaa108"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+...
+ the COVID-19 epidemic shows the need for epidemiology to go back to its
+ roots—thinking about populations.
+ Studying disease occurrence by person, place and time (often referred to
+ as ‘descriptive epidemiology’) is usually taught in introductory courses,
+ even if this approach is then paid little attention subsequently.
+ COVID-19 is a striking example of how we can learn a great deal from comparing
+ countries, states, regions, time trends and persons, despite of all the
+ difficulties.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1093/ije/dyaa108"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With travel restrictions as they are in 2020, levels of migration across
+ national borders are considerably smaller than that across state or provincial
+ boundries.
+ In some countries, school closures were ordered only within particular
+ states.
+ For these reasons, and given the data currently available, only models
+ at the level of individual countries and interventions ordered nationally
+ are considered here.
+ 
+\end_layout
+
+\begin_layout Paragraph*
+{Jewell20}: Predictive Mathematical Models of the COVID-19 Pandemic: Underlying
+ Principles and Value of Projections
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Predictive models for large countries, such as the US, are even more problematic
+ because they aggregate heterogeneous subepidemics in local areas....
+ Models should also seek to use the best possible data for local predictions.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1001/jama.2020.6585"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Standard
+For each country the goal of Covasim optimization is to minimize the difference
+ between the model and data about the number of diagnosed cases of, and
+ deaths caused by, COVID.
+ The objective measure used for optimization is to minimize sum-squared-differen
+ce (SSD) 
+\begin_inset Quotes eld
+\end_inset
+
+fit value
+\begin_inset Quotes erd
+\end_inset
+
+ between both of these.
+ As data regarding deaths is believed to generally more accurate than that
+ about positive tests, SSD over death rates is weighted twice that of diagnoses.
+ 
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:All-country-statistics"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the results for all 35 countries.
+ Visual inspection of the model vs.
+ data curves (see below) suggests that fit values > 1000 reflect poor model
+ fit; these have been highlighted for both plain and school closure conditions.
+ Here we are interested in the difference between two models, one incorporating
+ school closure interventions and one without these.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Improved-fit"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the range of differences in the fit value between these two conditions.
+ These differences can be very large when both models have poor fit (Taiwan,
+ North Macedonia, Hungary).
+ For most countries, the difference is small, < 150.
+ In the 10 countries where there was a significant difference between models,
+ those incorporating school closures were considerably better fits than
+ those without.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is the sentence that needs most statistical work around 
+\begin_inset Quotes eld
+\end_inset
+
+significant
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+better fit
+\begin_inset Quotes erd
+\end_inset
+
+!
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/comp-no:intrvn_200902.png
+	lyxscale 25
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:All-country-statistics"
+
+\end_inset
+
+All country statistics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/improvedFit-annote.png
+	lyxscale 25
+	width 75page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Improved-fit"
+
+\end_inset
+
+Improved fit
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Sample-countries"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the curves for Malaysia and New Zealand, two countries with large
+ improvements in model fit, and Switzerland which demonstates a smaller
+ difference in fit.
+ The Malaysian model with school closures uses a smaller value for beta
+ (3.000E-3 vs.
+ 3.004E-3) and a much larger initial number of infected (4713 vs.
+ 112); New Zealand shows a similar adjustment.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/sampleCountries.png
+	lyxscale 5
+	height 80pheight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Sample-countries"
+
+\end_inset
+
+Sample countries
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Anomolous-countries"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the pairs of mismatching model predictions for Taiwan, North Macedonia,
+ Hungary.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/anomoly-Countries.png
+	lyxscale 5
+	height 80pheight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Anomolous-countries"
+
+\end_inset
+
+Anomolous countries
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Methods
+\end_layout
+
+\begin_layout Subsection
+Data sources
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/dataSources.png
+	lyxscale 50
+	height 3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Data-sources"
+
+\end_inset
+
+Data sources
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+OurWorldInData 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "owidcoronavirus"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "Covid-19 Control Strategies List"
+target "https://github.com/amel-github/covid19-interventionmeasures"
+literal "false"
+
+\end_inset
+
+, developed by Amélie Desvars-Larrive and colleagues [
+\begin_inset CommandInset href
+LatexCommand href
+name "Complexity Science Hub Vienna"
+target "https://www.csh.ac.at"
+literal "false"
+
+\end_inset
+
+] 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/educ_intervene-uniq.png
+	lyxscale 50
+	height 3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Intervention-dates-and"
+
+\end_inset
+
+Intervention dates and educational levels
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Covasim
+\end_layout
+
+\begin_layout Standard
+Covasim 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kerr2020.05.10.20097469"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Optuna 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1145/3292500.3330701"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Tree-Structured Parzen Estimator 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1145/3377930.3389817"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+CMAEvolution 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hansen2016cma"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Did not make use of SynthPop
+\end_layout
+
+\begin_layout Subsection
+Key details
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+self.weights = sc.mergedicts({'cum_deaths':10, 'cum_diagnoses':5}, weights)
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+educLevelSize = {'h':4, 'w':20, 'c':20, 'sk': 20, 'sp': 20, 'ss': 40 , 'su':
+ 80}
+\end_layout
+
+\begin_layout Itemize
+Only countries with populations > 1e6 were considered.
+\end_layout
+
+\begin_layout Itemize
+Only countries with educational interventions coming after at least one
+ week of diagnoses and death data were considered.
+ For example, while both Ghana and Mauritius had school closures, but data
+ on diagnoses and deaths was not available for a week before the dates of
+ their closures.
+\end_layout
+
+\begin_layout Itemize
+Simulation start date picked when number of infections becomes > 50
+\end_layout
+
+\begin_layout Itemize
+Each educational level (kindergarten, primary, secondary, university) was
+ treated as a separate 
+\begin_inset Quotes eld
+\end_inset
+
+layer
+\begin_inset Quotes erd
+\end_inset
+
+ by Covasim and captured into separate age ranges within the total population.
+ This allows interventions at different educational levels to be treated
+ independently.
+ 
+\end_layout
+
+\begin_layout Itemize
+Each school closure at any educational level is modeled as a simple on/off:
+ school closings start on a specified date, infection rate was set very
+ low (
+\family typewriter
+ClosedSchoolBeta = 0.02
+\family default
+) for children in each age group associated with the educational level,
+ and are assumed to be in effect until an end-of-closure date.
+\end_layout
+
+\begin_layout Itemize
+In a small number (6 of 35) of cases, the Covid-19 Control Strategies List
+ contained a specific 
+\emph on
+end
+\emph default
+ for the school closure; for these countries that date was used to end the
+ intervention.
+ Otherwise, a default 
+\family typewriter
+SchoolOutDate = 2020-06-01
+\family default
+ was used.
+\end_layout
+
+\begin_layout Subsection
+Age distribution
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+educLevel_ages = {'sk': [4,5], 'sp': [6,10], 'ss': [11,18], 'su': [19,24]}
+\end_layout
+
+\begin_layout Standard
+The distinguished age cohorts associated with school levels is shown in
+ Figure 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/Malaysia-people.png
+	lyxscale 5
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:PopAgeDist"
+
+\end_inset
+
+Population age distribution
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Estimating background testing rates
+\end_layout
+
+\begin_layout Standard
+All models of an epidemic that attempt to account for positive diagnoses
+ must have data, or make assumptions, about the context of 
+\emph on
+testing
+\emph default
+ within which the positive results are obtained.
+ For example, Covasim has different parameters specifying the assumed testing
+ levels of symptomatic vs.
+ non-symptomatic individuals.
+ Following a suggestion from Roser et al:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Perhaps the biggest challenge in thinking about testing is that the number
+ of tests performed depends on a country’s testing strategy—that is, how
+ many people a country intends to test given its context....
+ Some testing strategies focus on high-risk groups such as health care workers
+ or high-risk locations such as nursing homes.
+ Strategies that focus on those at the highest risk will result in a lower
+ number of tests performed per confirmed case, meaning countries will know
+ less about of the true magnitude of the outbreak in the community at large....
+ In general, a high number of 
+\emph on
+tests per death
+\emph default
+ is preferable because it indicates widespread testing and assessment of
+ community transmission.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "owidcoronavirus"
+literal "false"
+
+\end_inset
+
+, identify-covid-exemplars
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our model bases each country's assumed testing rate on data regarding tests
+ per death.
+ Most countries captured in OWID data report the number of 
+\emph on
+tests performed
+\emph default
+, but a smaller fraction (8 of 35) report instead the number of 
+\emph on
+individuals tested
+\emph default
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+https://ourworldindata.org/coronavirus#acknowledgements
+\end_layout
+
+\end_inset
+
+.
+ Relating one or the other to reported deaths and to a country's population
+ gives a rate of testing across time.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Testing-rates"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the 
+\emph on
+final
+\emph default
+, most recent rate of testing for each country.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/testRates.png
+	lyxscale 25
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Testing-rates"
+
+\end_inset
+
+Testing rates
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We then make the optimistic assumption that this final level of testing
+ has been going on constantly throughout 2020.
+ That is, we take the final per-country tests-per-death measure as an 
+\emph on
+upper bound
+\emph default
+ on how much testing has actually occurred, and from which the diagnosis
+ data is drawn.
+ This is certainly a crude assumption, and optimistically imagines an abundance
+ of testing providing statistical stability for observed positive diagnoses.
+ Nevertheless, it does allow per-country levels of testing to be varied
+ reasonably.
+ As Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Testing-rates"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows, these per-country estimates vary over two orders of magnitude, but
+ the estimates based on individual vs.
+ on test reported data are similar.
+\end_layout
+
+\begin_layout Subsection
+Model optimization using Optuna
+\end_layout
+
+\begin_layout Standard
+We optimize over two parameters, 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathrm{\mathbf{initialInfect}}$
+\end_inset
+
+, the date of initial infection.
+ Both TFE and CMAES samplers were used, and NTrial=100 trials were allocated
+ to find the search for parameter values causing the model to best fit the
+ data.
+\end_layout
+
+\begin_layout Section
+Next steps
+\end_layout
+
+\begin_layout Subsection
+Model validation
+\end_layout
+
+\begin_layout Enumerate
+{lauerReich20}: Infectious Disease Forecasting for Public Health 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lauerReich20"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+{bergmeir18}:A note on the validity of cross-validation for evaluating autoregre
+ssive time series prediction 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "bergmeir18"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+{bergmeirBenitez12}: On the use of cross-validation for time series predictor
+ evaluation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "bergmeirBenitez12"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Integration of genomic data: molecular epidemiology
+\end_layout
+
+\begin_layout Itemize
+Rockett 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rockett:2020uf"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+examine the added value of near real-time genome sequencing of SARS-CoV-2
+ in a subpopulation of infected patients during the first 10 weeks of COVID-19
+ containment in Australia and compare findings from genomic surveillance
+ with predictions of a computational agent-based model (ABM)
+\end_layout
+
+\begin_layout Enumerate
+based on AceMOD
+\end_layout
+
+\begin_layout Enumerate
+21 January and 28 March 2020, 1,617 cases of COVID- 19 were diagnosed and
+ reported to the NSW Ministry of Health.
+ All patients resided in metropolitan Sydney.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "covid"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
