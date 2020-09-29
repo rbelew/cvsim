@@ -45,7 +45,7 @@ TypicalTestRate = 0.01
 CurrCtnyParams = {}
 
 n_trials  = 5
-n_workers = 1
+n_workers = 4
 
 def loadDataFile(inf):	
 	reader = csv.DictReader(open(inf))
@@ -217,14 +217,6 @@ def create_sim(x):
 				age_dist = CurrCtnyParams['age_dist'])
 	# NB: contacts set via pars, but parallel layer-dependent dicts are not!
 
-	# from parameters.reset_layer_pars()
-	# 	defaults_h = dict(
-	# 		beta_layer  = dict(h=3.0, s=0.6, w=0.6, c=0.3), # Per-population beta weights; relative
-	# 		contacts	= dict(h=2.0, s=20,  w=16,  c=20),   # Number of contacts per person per day, estimated
-	# 		dynam_layer = dict(h=0,   s=0,   w=0,   c=0),	# Which layers are dynamic -- none by default
-	# 		iso_factor  = dict(h=0.3, s=0.1, w=0.1, c=0.1),  # Multiply beta by this factor for people in isolation
-	# 		quar_factor = dict(h=0.6, s=0.2, w=0.2, c=0.2),  # Multiply beta by this factor for people in quarantine
-	# 	)
 
 	# NB: contacts getting 's' layer added during initialization, somewhere?
 	del sim['contacts']['s']
@@ -263,10 +255,10 @@ def create_sim(x):
 
 	return sim
 
-def get_bounds():
+def get_bounds(popsize):
 	''' Set parameter starting points and bounds '''
 	
-	popsize = CurrCtnyParams['pop_size']
+	# popsize = CurrCtnyParams['pop_size']
 	piLB = int(popsize * .001)
 	piUB = int(popsize * .1)
 	piBest = int( (piLB + piUB)/2 )
@@ -295,27 +287,6 @@ def objective(x):
 	sim.run()
 	fit = sim.compute_fit()
 	ssErr = fit.mismatches	
-
-	fitMI = sim.compute_fit(skestimator='mutual_info_score')
-	miErr = fitMI.mismatches
-
-	diagMI = skmetric.adjusted_mutual_info_score(fit.pair['cum_diagnoses'][0],fit.pair['cum_diagnoses'][1])
-	deathMI = skmetric.adjusted_mutual_info_score(fit.pair['cum_deaths'][0],fit.pair['cum_deaths'][1])	
-	
-	outs = open(MIReportFile,'a')
-	
-	outs.write('%s,%f,%f,%f,%f,%f,%f\n' % (sim['location'], \
-											ssErr['cum_diagnoses'], ssErr['cum_deaths'], \
-											miErr['cum_diagnoses'], miErr['cum_deaths'], \
-											diagMI,deathMI))
-	outs.close()
-	
-	if PlotFitMeasures:
-		figs = fit.plot()
-		country = sim['location']
-		fitPlotFile = PlotDir + country + '-fitMeasures.png'
-		# NB: figs list has only one fig in it?
-		figs[0].savefig(fitPlotFile)
 	
 	return fit.mismatch
 
@@ -328,17 +299,19 @@ def op_objective(trial):
 
 	return objective(x)
 
-def worker(storage,study_name):
+def worker(storage,study_name,pop_size):
 # 	storage = CurrCtnyParams['storage']
 # 	study_name = '200929_' + CurrCtnyParams['location']
 	study = op.load_study(storage=storage, study_name=study_name)
-	return study.optimize(op_objective, n_trials=n_trials)
+	return study.optimize(op_objective, n_trials=n_trials,pop_size=pop_size)
 
 
 def run_workers():
 	storage = CurrCtnyParams['storage']
 	study_name = CurrCtnyParams['location']
-	return sc.parallelize(worker, n_workers,ncpus=4,storage=storage,study_name=study_name)
+	pop_size =  CurrCtnyParams['pop_size']
+	return sc.parallelize(worker, n_workers,ncpus=4,storage=storage,study_name=study_name,pop_size=pop_size)
+	# return sc.parallelize(worker, n_workers,ncpus=4,storage=storage,study_name=study_name,cntyParam=CurrCtnyParams)
 	# return sc.parallelize(worker, n_workers,ncpus=4)
 
 
@@ -428,11 +401,20 @@ if __name__ == '__main__':
 	
 	# global CurrCtnyParams
 			
-	hostname = socket.gethostname()
-	if hostname == 'hancock':
-		dataDir = '/System/Volumes/Data/rikData/coviData/'
-	elif hostname == 'mjq':
-		dataDir = '/home/Data/covid/'
+# 	hostname = socket.gethostname()
+# 	if hostname == 'hancock':
+# 		dataDir = '/System/Volumes/Data/rikData/coviData/'
+# 	elif hostname == 'mjq':
+# 		dataDir = '/home/Data/covid/'
+
+	dataDir = 'PATH_TO_CVSIM_DATA'
+
+	# local directory built from cv.load_ecdp_data.py
+	#'European Centre for Disease Prevention and Control Covid-19 Data Scraper'
+	# pars['load_path'] = 'https://opendata.ecdc.europa.eu/covid19/casedistribution/csv'
+
+	ECDPDir = dataDir + 'data/epi_data/corona-data/'
+
 
 	DBDir = dataDir + 'db/'
 	if not os.path.exists(DBDir):
@@ -480,15 +462,6 @@ if __name__ == '__main__':
 	
 	to_plot = ['cum_diagnoses', 'cum_deaths', 'cum_tests']
 	
-	ECDCDirOrig = dataDir + 'data/ecdc-orig/'
-	ECDCDir = dataDir + 'data/ecdc/'
-	
-	# local directory built from cv.load_ecdp_data.py
-	#'European Centre for Disease Prevention and Control Covid-19 Data Scraper'
-	# pars['load_path'] = 'https://opendata.ecdc.europa.eu/covid19/casedistribution/csv'
-
-	ECDPDir = dataDir + 'data/epi_data/corona-data/'
-
 	# totPop data redundant and perhaps inconsistent
 	# but needed to initialize sim: pars['tot_pop'] = tot_pop ?
 	# 2do: replace!
@@ -597,7 +570,7 @@ if __name__ == '__main__':
 
 		# initial run
 		print(f'Running initial for {country}...')
-		pars, pkeys = get_bounds() # Get parameter guesses
+		pars, pkeys = get_bounds(CurrCtnyParams['pop_size']) # Get parameter guesses
 		sim = create_sim(pars.best)
 		sim.run()
 		
