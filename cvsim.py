@@ -1,8 +1,8 @@
 ''' cvsimTst:  testing of covasim
 Created on Aug 11, 2020
 
-@version: 0.1
-Sept 4 2020
+@version: 0.2.1
+Sept 30 2020
 
 @author: rbelew@ucsd.edu
 '''
@@ -21,8 +21,9 @@ from sklearn import metrics as skmetric
 
 import covasim as cv
 import covasim.interventions as cvintrv
+import covasim.misc as cvm
 
-from covasim.data import country_age_data as cad
+# from covasim.data import country_age_data as cad
 
 import sciris as sc
 import optuna as op
@@ -41,21 +42,6 @@ DecadeKeys = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-7
 EducLevel_ages = {'pre': [0,3],'sk': [4,5], 'sp': [6,10], 'ss': [11,18], 'su': [19,24],'work': [25, 65],'old': [66,100]}
 EducLevelKeys = ['pre','sk', 'sp', 'ss', 'su','work','old']
 TypicalTestRate = 0.01
-
-CurrCtnyParams = {}
-
-n_trials  = 5
-n_workers = 4
-
-def loadDataFile(inf):	
-	reader = csv.DictReader(open(inf))
-	dataTbl = {}
-	for i,entry in enumerate(reader):
-		# date,cum_diagnoses,cum_deaths
-		dataTbl[entry['date']] = {'cummDiag': int(entry['cum_diagnoses']), 
-								  'cummDeath': int(entry['cum_deaths'])}
-		
-	return dataTbl
 
 def loadTotalPop(inf):	
 	reader = csv.DictReader(open(inf))
@@ -286,7 +272,6 @@ def objective(x):
 	sim = create_sim(x)
 	sim.run()
 	fit = sim.compute_fit()
-	ssErr = fit.mismatches	
 	
 	return fit.mismatch
 
@@ -299,37 +284,42 @@ def op_objective(trial):
 
 	return objective(x)
 
-def worker(storage,study_name,pop_size):
-# 	storage = CurrCtnyParams['storage']
-# 	study_name = '200929_' + CurrCtnyParams['location']
-	study = op.load_study(storage=storage, study_name=study_name)
-	return study.optimize(op_objective, n_trials=n_trials,pop_size=pop_size)
+def worker():
+# def worker(storage,study_name,pop_size):
+	storage = CurrCtnyParams['storage']
+	name = '200930_' + CurrCtnyParams['location']
+	study = op.load_study(storage=storage, study_name=name)
+	return study.optimize(op_objective, n_trials=n_trials)
 
 
 def run_workers():
+	return sc.parallelize(worker, n_workers,ncpus=4)
+
+
+def make_study():
+
 	storage = CurrCtnyParams['storage']
-	study_name = CurrCtnyParams['location']
-	pop_size =  CurrCtnyParams['pop_size']
-	return sc.parallelize(worker, n_workers,ncpus=4,storage=storage,study_name=study_name,pop_size=pop_size)
-	# return sc.parallelize(worker, n_workers,ncpus=4,storage=storage,study_name=study_name,cntyParam=CurrCtnyParams)
-	# return sc.parallelize(worker, n_workers,ncpus=4)
-
-
-def make_study(storage,name,sampler=None):
+	name = CurrCtnyParams['location']
+	
 	try: 
 		op.delete_study(storage=storage, study_name=name)
 	except: 
 		pass
-	if sampler == None:
+	if OptunaSampler == None:
 		return op.create_study(storage=storage, study_name=name)
 	else:
-		return op.create_study(storage=storage, study_name=name,sampler=sampler)
+		return op.create_study(storage=storage, study_name=name,sampler=OptunaSampler)
 
 def calibrate(sampler=None):
-	''' Perform the calibration wrt/ GLOBAL CurrCtnyParams'''
-	make_study(CurrCtnyParams['storage'], CurrCtnyParams['location'],sampler=sampler)
+	''' Perform the calibration wrt/ GLOBAL CurrCtnyParams
+	'''
+	
+	storage = CurrCtnyParams['storage']
+	name = CurrCtnyParams['location']
+
+	make_study()
 	run_workers()
-	study = op.load_study(storage=CurrCtnyParams['storage'], study_name=CurrCtnyParams['location'])
+	study = op.load_study(storage=storage, study_name=name)
 	output = study.best_params
 	return output, study
 
@@ -385,9 +375,10 @@ def bldEducLevelBeta(intrvList,endDateSpec):
 	return [levIntrv[elayer] for elayer in levIntrv.keys()]
 
 def findStartDate(datafile,minInfect=50):
-	dataTbl = loadDataFile(datafile)
-	for date in sorted(dataTbl.keys()):
-		if dataTbl[date]['cummDiag'] > minInfect:
+	dataTbl = cvm.load_data(datafile)
+	cummDiagVec = dataTbl['cum_diagnoses']
+	for date in cummDiagVec.keys():
+		if cummDiagVec[date] > minInfect:
 			return date
 	return None
 	
@@ -398,14 +389,17 @@ if __name__ == '__main__':
 	global UseTestRate
 	global UseUNAgeData
 	global UNAgeData
+	global n_trials
+	global n_workers
+
 	
-	# global CurrCtnyParams
+	global CurrCtnyParams
 			
-# 	hostname = socket.gethostname()
-# 	if hostname == 'hancock':
-# 		dataDir = '/System/Volumes/Data/rikData/coviData/'
-# 	elif hostname == 'mjq':
-# 		dataDir = '/home/Data/covid/'
+	# hostname = socket.gethostname()
+	# if hostname == 'hancock':
+	# 	dataDir = '/System/Volumes/Data/rikData/coviData/'
+	# elif hostname == 'mjq':
+	# 	dataDir = '/home/Data/covid/'
 
 	dataDir = 'PATH_TO_CVSIM_DATA'
 
@@ -414,7 +408,6 @@ if __name__ == '__main__':
 	# pars['load_path'] = 'https://opendata.ecdc.europa.eu/covid19/casedistribution/csv'
 
 	ECDPDir = dataDir + 'data/epi_data/corona-data/'
-
 
 	DBDir = dataDir + 'db/'
 	if not os.path.exists(DBDir):
@@ -436,8 +429,17 @@ if __name__ == '__main__':
 	PlotPeople = False
 	Calibrate = True
 	SchoolClose = True
-	UseTestRate = 'search' # 'data' or 'search' or 'constant'
+	UseTestRate = 'constant' # 'data' or 'search' or 'constant'
 	PlotFitMeasures = False
+
+	n_trials  = 2
+	n_workers = 4
+
+# 	cmaesSampler = CmaEsSampler()
+# 	OptunaSampler = cmaesSampler
+# 	print('** Using cmaesSampler')
+	OptunaSampler = None
+
 	
 	CVNameMap = {'New_Zealand':    'New Zealand',
 				'North_Macedonia': 'The former Yugoslav Republic of Macedonia',
@@ -484,8 +486,6 @@ if __name__ == '__main__':
 	allAgeStratDict,allDecStratDict = loadAgeDistrib(UNAgeDistFile)
 	UNAgeData = educAgeToNPArr(allAgeStratDict)
 
-	cmaesSampler = CmaEsSampler()
-
 	tstCountry = ['New_Zealand', 'Malaysia', 'North_Macedonia', 'Taiwan', 'Senegal','Singapore']
 	
 	for country in sorted(EducCountryNames):
@@ -507,7 +507,7 @@ if __name__ == '__main__':
 
 		storage   = f'sqlite:///{dbfile}'
 
-		datafile = ECDCDir + country + '.csv'
+		datafile = ECDPDir + country + '.csv'
 											
 		pars = parsCommon.copy()
 		
@@ -520,13 +520,14 @@ if __name__ == '__main__':
 		# Use location as CV-internal name
 		# 	  country as externally consistent
 		
-		CVCountryNames = cad.get().keys()
-		if country not in CVCountryNames:
-			print('* Mapping country "%s" -> CV "%s"' % (country,CVNameMap[country]))
-			pars['location'] = CVNameMap[country]
-		else:
-			pars['location'] = country
+# 		CVCountryNames = cad.get().keys()
+# 		if country not in CVCountryNames:
+# 			print('* Mapping country "%s" -> CV "%s"' % (country,CVNameMap[country]))
+# 			pars['location'] = CVNameMap[country]
+# 		else:
+# 			pars['location'] = country
 			
+		pars['location'] = country
 		pars['country'] = country
 			
 		pars['datafile'] = datafile
@@ -590,8 +591,8 @@ if __name__ == '__main__':
 			print(f'Starting calibration for {country}...')
 			T = sc.tic()
 			
-			print('** Using cmaesSampler')
-			pars_calib, study = calibrate(sampler=cmaesSampler)
+# 			pars_calib, study = calibrate(sampler=cmaesSampler)
+			pars_calib, study = calibrate()
 	
 			sc.toc(T)
 		
