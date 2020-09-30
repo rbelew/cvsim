@@ -437,11 +437,11 @@ if __name__ == '__main__':
 # 	n_trials  = 2
 # 	n_workers = 4
 
-# 	OptunaSampler = None
+ 	OptunaSampler = None
 
-	cmaesSampler = CmaEsSampler()
-	OptunaSampler = cmaesSampler
-	print('** Using cmaesSampler')
+#	cmaesSampler = CmaEsSampler()
+#	OptunaSampler = cmaesSampler
+#	print('** Using cmaesSampler')
 
 	
 	CVNameMap = {'New_Zealand':    'New Zealand',
@@ -538,7 +538,7 @@ if __name__ == '__main__':
 		pars['tot_pop'] = tot_pop
 		pop_scale = int(pars['tot_pop']/pars['pop_size'])
 		pars['pop_scale'] = pop_scale
-		pars['age_dist'] = UNAgeData[country]
+#		pars['age_dist'] = UNAgeData[country]
 		pars['interventions'] = []
 			
 		if UseTestRate == 'constant':	
