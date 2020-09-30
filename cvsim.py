@@ -29,6 +29,10 @@ import sciris as sc
 import optuna as op
 from optuna.samplers import CmaEsSampler
 
+CurrCtnyParams = {}
+n_trials  = 2
+n_workers = 4
+
 # Countries WITH education level interventions AND at least a week of data before this
 EducCountryNames = ['Austria', 'Belgium', 'Switzerland', 'Czechia', 'Germany',
 					'Denmark', 'Ecuador', 'Spain', 'Estonia', 'Finland', 'France',
@@ -389,19 +393,18 @@ if __name__ == '__main__':
 	global UseTestRate
 	global UseUNAgeData
 	global UNAgeData
-	global n_trials
-	global n_workers
-
 	
-	global CurrCtnyParams
+# 	global n_trials
+# 	global n_workers	
+# 	global CurrCtnyParams
 			
-	# hostname = socket.gethostname()
-	# if hostname == 'hancock':
-	# 	dataDir = '/System/Volumes/Data/rikData/coviData/'
-	# elif hostname == 'mjq':
-	# 	dataDir = '/home/Data/covid/'
+	hostname = socket.gethostname()
+	if hostname == 'hancock':
+		dataDir = '/System/Volumes/Data/rikData/coviData/'
+	elif hostname == 'mjq':
+		dataDir = '/home/Data/covid/'
 
-	dataDir = 'PATH_TO_CVSIM_DATA'
+	# dataDir = 'PATH_TO_CVSIM_DATA'
 
 	# local directory built from cv.load_ecdp_data.py
 	#'European Centre for Disease Prevention and Control Covid-19 Data Scraper'
@@ -432,13 +435,14 @@ if __name__ == '__main__':
 	UseTestRate = 'constant' # 'data' or 'search' or 'constant'
 	PlotFitMeasures = False
 
-	n_trials  = 2
-	n_workers = 4
+# 	n_trials  = 2
+# 	n_workers = 4
 
-# 	cmaesSampler = CmaEsSampler()
-# 	OptunaSampler = cmaesSampler
-# 	print('** Using cmaesSampler')
-	OptunaSampler = None
+# 	OptunaSampler = None
+
+	cmaesSampler = CmaEsSampler()
+	OptunaSampler = cmaesSampler
+	print('** Using cmaesSampler')
 
 	
 	CVNameMap = {'New_Zealand':    'New Zealand',
