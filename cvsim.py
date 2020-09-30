@@ -289,7 +289,6 @@ def op_objective(trial):
 	return objective(x)
 
 def worker():
-# def worker(storage,study_name,pop_size):
 	storage = CurrCtnyParams['storage']
 	name = '200930_' + CurrCtnyParams['location']
 	study = op.load_study(storage=storage, study_name=name)
@@ -398,13 +397,13 @@ if __name__ == '__main__':
 # 	global n_workers	
 # 	global CurrCtnyParams
 			
-	hostname = socket.gethostname()
-	if hostname == 'hancock':
-		dataDir = '/System/Volumes/Data/rikData/coviData/'
-	elif hostname == 'mjq':
-		dataDir = '/home/Data/covid/'
+	# hostname = socket.gethostname()
+	# if hostname == 'hancock':
+	# 	dataDir = '/System/Volumes/Data/rikData/coviData/'
+	# elif hostname == 'mjq':
+	# 	dataDir = '/home/Data/covid/'
 
-	# dataDir = 'PATH_TO_CVSIM_DATA'
+	dataDir = 'PATH_TO_CVSIM_DATA'
 
 	# local directory built from cv.load_ecdp_data.py
 	#'European Centre for Disease Prevention and Control Covid-19 Data Scraper'
