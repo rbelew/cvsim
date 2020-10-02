@@ -1,8 +1,8 @@
 ''' cvsimTst:  testing of covasim
 Created on Aug 11, 2020
 
-@version: 0.2.1
-Sept 30 2020
+@version: 0.2.2
+Oct 2 2020
 
 @author: rbelew@ucsd.edu
 '''
@@ -10,6 +10,9 @@ Sept 30 2020
 from collections import defaultdict
 import csv
 from datetime import date
+from itertools import repeat
+import math
+import pickle
 import os
 import socket
 import sys
@@ -18,6 +21,8 @@ import numpy as np
 import pylab as pl
 
 from sklearn import metrics as skmetric
+
+import sqlite3 as sqlite
 
 import covasim as cv
 import covasim.interventions as cvintrv
@@ -29,8 +34,35 @@ import sciris as sc
 import optuna as op
 from optuna.samplers import CmaEsSampler
 
+from multiprocessing import Pool, cpu_count
+import cma
+
+# https://stackoverflow.com/a/57364423
+# istarmap.py for Python 3.8+
+import multiprocessing.pool as mpp
+def istarmap(self, func, iterable, chunksize=1):
+	"""starmap-version of imap
+	"""
+	self._check_running()
+	if chunksize < 1:
+		raise ValueError(
+			"Chunksize must be 1+, not {0:n}".format(
+				chunksize))
+
+	task_batches = mpp.Pool._get_tasks(func, iterable, chunksize)
+	result = mpp.IMapIterator(self)
+	self._taskqueue.put(
+		(
+			self._guarded_task_generation(result._job,
+										  mpp.starmapstar,
+										  task_batches),
+			result._set_length
+		))
+	return (item for chunk in result for item in chunk)
+mpp.Pool.istarmap = istarmap
+
 CurrCtnyParams = {}
-n_trials  = 2
+n_trials  = 10
 n_workers = 4
 
 # Countries WITH education level interventions AND at least a week of data before this
@@ -46,6 +78,22 @@ DecadeKeys = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-7
 EducLevel_ages = {'pre': [0,3],'sk': [4,5], 'sp': [6,10], 'ss': [11,18], 'su': [19,24],'work': [25, 65],'old': [66,100]}
 EducLevelKeys = ['pre','sk', 'sp', 'ss', 'su','work','old']
 TypicalTestRate = 0.01
+
+
+def initDB(currDB):
+	curs = currDB.cursor()
+	cmd = '''CREATE TABLE trial (
+					idx	INTEGER,
+					gen	INTEGER,
+					indiv	INTEGER,
+					value	REAL,
+					infect	INTEGER,
+					beta	REAL,
+					testrate	REAL,
+					PRIMARY KEY(idx) ) '''
+	curs.execute(cmd)
+
+	return currDB
 
 def loadTotalPop(inf):	
 	reader = csv.DictReader(open(inf))
@@ -172,12 +220,14 @@ def loadFinalTestRate(inf):
 		
 	return testRate
 
-def create_sim(x):
+def create_sim(x,currCtyPar):
 
-	beta = x[0]
-	pop_infected = x[1]
-	if UseTestRate=='search':
-		test_rate = x[2]
+	if currCtyPar['useLogParam']:
+		pop_infected = math.exp(x[0])
+		beta		 = math.exp(x[1])
+	else:
+		pop_infected = x[0]
+		beta		 = x[1]
 
 	# cliffckerr, https://github.com/InstituteforDiseaseModeling/covasim/issues/269
 	# The data file and location are properties of the simulation, not model
@@ -186,16 +236,16 @@ def create_sim(x):
 	# to Optuna, and should also not be part of the pars object.
 
 	pars = sc.objdict(
-		pop_size	 = CurrCtnyParams['pop_size'],
-		pop_scale	= CurrCtnyParams['pop_scale'],
-		pop_type	 = CurrCtnyParams['pop_type'],
-		start_day	= CurrCtnyParams['start_day'],
-		end_day	  = CurrCtnyParams['end_day'],
-		asymp_factor = CurrCtnyParams['asymp_factor'],
-		contacts	 = CurrCtnyParams['contacts'],
-		rescale	  = CurrCtnyParams['rescale'],
-		verbose	  = CurrCtnyParams['verbose'],
-		interventions = CurrCtnyParams['interventions'],
+		pop_size	 = currCtyPar['pop_size'],
+		pop_scale	= currCtyPar['pop_scale'],
+		pop_type	 = currCtyPar['pop_type'],
+		start_day	= currCtyPar['start_day'],
+		end_day	  = currCtyPar['end_day'],
+		asymp_factor = currCtyPar['asymp_factor'],
+		contacts	 = currCtyPar['contacts'],
+		rescale	  = currCtyPar['rescale'],
+		verbose	  = currCtyPar['verbose'],
+		interventions = currCtyPar['interventions'],
 		# 
 
 		beta		 = beta,
@@ -203,8 +253,9 @@ def create_sim(x):
 	)
 
 	# Create the baseline simulation
-	sim = cv.Sim(pars=pars,datafile=CurrCtnyParams['datafile'],location=CurrCtnyParams['location'], \
-				age_dist = CurrCtnyParams['age_dist'])
+	sim = cv.Sim(pars=pars,datafile=currCtyPar['datafile'],location=currCtyPar['location'], \
+				age_dist = currCtyPar['age_dist'], datacols=currCtyPar['datacols'] )
+
 	# NB: contacts set via pars, but parallel layer-dependent dicts are not!
 
 
@@ -233,9 +284,13 @@ def create_sim(x):
 	# what do they do?!
 	sim['prognoses']['sus_ORs'][0] = 1.0 # ages 0-10
 	sim['prognoses']['sus_ORs'][1] = 1.0 # ages 10-20
-	
+
+
 	# NB: UseTestRate==constant or ==data: test interventions already added in _main
-	if UseTestRate=='search':
+	if currCtyPar['useTestRate']=='search':
+		# NB: no LOG transform on test_rate
+		test_rate = x[2]
+
 		testIntrvn = cvintrv.test_prob(symp_prob=test_rate, asymp_prob=test_rate)
 		testIntrvn.do_plot = False
 		
@@ -245,22 +300,43 @@ def create_sim(x):
 
 	return sim
 
-def get_bounds(popsize):
-	''' Set parameter starting points and bounds '''
 	
-	# popsize = CurrCtnyParams['pop_size']
-	piLB = int(popsize * .001)
-	piUB = int(popsize * .1)
-	piBest = int( (piLB + piUB)/2 )
+def get_bounds():
+	''' Set parameter starting points and bounds '''
+
 	pdict = sc.objdict(
-		beta		 = dict(best=0.00522, lb=0.003, ub=0.008),
-		pop_infected = dict(best=piBest,  lb=piLB,   ub=piUB),
+		pop_infected = dict(best=10000,  lb=1000,   ub=50000),
+		beta		 = dict(best=0.015, lb=0.007, ub=0.020),
 	)
+
 	if UseTestRate=='search':
 		trBest = TypicalTestRate
-		trLB = trBest * 0.1
-		trUB = trBest * 10
+		trLB = 0. # trBest * 0.1
+		trUB = 1. # trBest * 10
 		pdict['test_rate'] = dict(best=trBest,  lb=trLB,   ub=trUB)
+		
+	if UseLogParam:
+		# NB: only ['pop_infected','beta'] LOG transformed
+		for param in ParamLogTransformed:
+			
+			for key in ['best', 'lb', 'ub']:
+				pdict[param][key] = math.log(pdict[param][key])
+		
+		
+	# JPG calibration
+# 	pdict = sc.objdict(
+# 		beta		 = dict(best=0.00522, lb=0.003, ub=0.008),
+# 		pop_infected = dict(best=4500,  lb=1000,   ub=10000),
+# 	)
+
+	# Cliff's auto_calibration
+# 	pdict = sc.objdict(
+# 		pop_infected = dict(best=10000,  lb=1000,   ub=50000),
+# 		beta		 = dict(best=0.015, lb=0.007, ub=0.020),
+# 		beta_day	 = dict(best=20,	lb=5,	 ub=60),
+# 		beta_change  = dict(best=0.5,   lb=0.2,   ub=0.9),
+# 		symp_test	= dict(best=30,   lb=5,	ub=200),
+# 	)
 
 	# Convert from dicts to arrays
 	pars = sc.objdict()
@@ -269,11 +345,11 @@ def get_bounds(popsize):
 
 	return pars, pdict.keys()
 
-def objective(x):
+def objective(x,currCtyPar):
 	''' Define the objective function we are trying to minimize '''
 
 	# Create and run the sim
-	sim = create_sim(x)
+	sim = create_sim(x,currCtyPar)
 	sim.run()
 	fit = sim.compute_fit()
 	
@@ -288,16 +364,14 @@ def op_objective(trial):
 
 	return objective(x)
 
-def worker():
+def worker(CurrCtnyParams):
 	storage = CurrCtnyParams['storage']
 	name = '200930_' + CurrCtnyParams['location']
 	study = op.load_study(storage=storage, study_name=name)
 	return study.optimize(op_objective, n_trials=n_trials)
 
-
-def run_workers():
-	return sc.parallelize(worker, n_workers,ncpus=4)
-
+def run_workers(CurrCtnyParams):
+	return sc.parallelize(worker, n_workers, kwargs={'CurrCtnyParams':CurrCtnyParams}, ncpus=4)
 
 def make_study():
 
@@ -313,7 +387,8 @@ def make_study():
 	else:
 		return op.create_study(storage=storage, study_name=name,sampler=OptunaSampler)
 
-def calibrate(sampler=None):
+# def calibrate(cntyParams):
+def calibrate():
 	''' Perform the calibration wrt/ GLOBAL CurrCtnyParams
 	'''
 	
@@ -321,10 +396,114 @@ def calibrate(sampler=None):
 	name = CurrCtnyParams['location']
 
 	make_study()
-	run_workers()
+	run_workers(CurrCtnyParams)
 	study = op.load_study(storage=storage, study_name=name)
 	output = study.best_params
 	return output, study
+
+def calibrate2(currDB):
+	
+	ngen = 25
+	cmaesPopSize = n_trials * n_workers  
+	print(f'calibrate2: cmaesPopSize={cmaesPopSize} ngen={ngen}')
+
+	pars, pkeys = get_bounds() # Get parameter guesses
+	print(f'calibrate2: pars={pars}')
+
+	
+	hdr = '# Gen,I,' + ','.join(pkeys)
+	print(hdr)
+	
+	initDB(currDB)
+	cursor = currDB.cursor()
+	trialAttrbNames = 'gen,indiv,value,infect,beta,testrate'
+	
+	esopts = { "popsize": cmaesPopSize, \
+				# 'CMA_elitist': True,
+
+				# Argument bounds can be None or bounds[0] and bounds[1] are lower and
+				# upper domain boundaries, each is either None or a scalar or a list
+				# or array of appropriate size.	            
+				'bounds': [np.array(pars['lb']), np.array(pars['ub']) ],
+				# 'bounds': [ [1.e+03, 1.e-03],[5.e+04, 8.e-03] ],
+				
+				'verbose': 1,
+				} 
+	if not UseLogParam:
+		esopts['CMA_stds'] = [1e4,0.01]
+
+	es = cma.CMAEvolutionStrategy(
+            x0=np.array(pars['best']),
+            sigma0=1e-1, 
+            inopts=esopts
+        )	
+
+	for gen in range(25):
+		solutions = []
+		# values = []
+		currPop = es.ask()
+					
+		# NB: fixed number=4 processes
+		with Pool(4) as pool:
+			
+			zipObj = zip(currPop, repeat(CurrCtnyParams))
+			argList = list(zipObj)
+			
+			values = pool.starmap(objective,argList)
+			
+			for i,x in enumerate(currPop):
+				if UseLogParam:
+					infect = math.exp(x[0])
+					beta = math.exp(x[1])
+				else:
+					infect = x[0]
+					beta = x[1]
+
+				# NB: testrate NOT subject to LOG transform
+				if 'test_rate' in pkeys: 
+					test_rate = x[2]
+				else:
+					# NB: for inclusion in trial DB
+					test_rate = 0.
+	
+				# NB:  print full precision, for sampling database
+				line = f"# {gen},{i},{values[i]:.60g},{infect:.60g},{beta:.60g}"
+				if 'test_rate' in pkeys:
+					line += f',{test_rate:.60g}'	
+				print(line)
+				
+				valList = [ gen,i,values[i],infect,beta,test_rate ]
+				qms = ','.join(len(valList)*'?')
+				sql = 'insert into trial (' + trialAttrbNames + ') values (%s)' % (qms)
+				cursor.execute(sql,tuple(valList))
+
+			# eo-Pool context
+				
+		currDB.commit()
+				
+		es.tell(currPop, values)
+		es.disp()
+		stats = {'avg':{}, "std": {}}
+		for i,k in enumerate(pkeys):
+			vals = []
+			for indiv in currPop:
+				if UseLogParam and k in ParamLogTransformed:
+					vals.append( math.exp(indiv[i]) )
+				else:
+					vals.append( indiv[i] )							
+			stats['avg'][k] = np.mean( vals )
+			stats['std'][k] = np.std(  vals )
+		for i,k in enumerate(pkeys):
+			print(f"> {gen} {i} {k} {stats['avg'][k]} {stats['std'][k]}")					
+	
+	es.result_pretty()
+	bestX = es.best.x
+	
+	# NB: return results in same form as get_bounds(), as expected by create_sim()
+	# NB: it will do exp() on these values if UseLogParam!
+	
+	return bestX
+	
 
 
 # ASSUME school closings START and then assumed to be in effect until SchoolOut date
@@ -377,33 +556,59 @@ def bldEducLevelBeta(intrvList,endDateSpec):
 
 	return [levIntrv[elayer] for elayer in levIntrv.keys()]
 
-def findStartDate(datafile,minInfect=50):
+
+def getCountryInfo(datafile,minInfect=50):
+	infoDict = {'start_date': None,
+				'tot_pop': None}
+	
 	dataTbl = cvm.load_data(datafile)
+	
+	popVec = dataTbl['population']	
+	# ASSUME total population doesn't change
+	# NB: make tot_pop an integer
+	infoDict['tot_pop'] = int(popVec[0])
+	infoDict['ndays'] = len(popVec)
+	
 	cummDiagVec = dataTbl['cum_diagnoses']
 	for date in cummDiagVec.keys():
 		if cummDiagVec[date] > minInfect:
-			return date
-	return None
+			infoDict['start_date'] = date
+			break
+		
+	testVec = dataTbl['tests']
+	infoDict['ntests'] = sum(1 for v in testVec.notna() if v==True)
+	
+	return infoDict
+
+def rptECDPSumm():
+	print('Country,Pop,StartDay,Ndays,Ntests')
+	for country in sorted(EducCountryNames):
+		datafile = ECDPDir + country + '.csv'									
+		cntyInfo = getCountryInfo(datafile,minInfect=50)
+		print(f'{country},{cntyInfo["tot_pop"]},{cntyInfo["start_date"]},{cntyInfo["ndays"]},{cntyInfo["ntests"]}')	
 	
 if __name__ == '__main__':
 	
-	global PlotFitMeasures
-	global PlotDir
 	global UseTestRate
 	global UseUNAgeData
 	global UNAgeData
+	global UseLogParam
+	global ParamLogTransformed
+	
+	global PlotFitMeasures
+	global PlotDir
 	
 # 	global n_trials
 # 	global n_workers	
 # 	global CurrCtnyParams
 			
-	# hostname = socket.gethostname()
-	# if hostname == 'hancock':
-	# 	dataDir = '/System/Volumes/Data/rikData/coviData/'
-	# elif hostname == 'mjq':
-	# 	dataDir = '/home/Data/covid/'
+	hostname = socket.gethostname()
+	if hostname == 'hancock':
+		dataDir = '/System/Volumes/Data/rikData/coviData/'
+	elif hostname == 'mjq':
+		dataDir = '/home/Data/covid/'
 
-	dataDir = 'PATH_TO_CVSIM_DATA'
+	# dataDir = 'PATH_TO_CVSIM_DATA'
 
 	# local directory built from cv.load_ecdp_data.py
 	#'European Centre for Disease Prevention and Control Covid-19 Data Scraper'
@@ -427,23 +632,20 @@ if __name__ == '__main__':
 	verbose = 1
 	interv  = 0
 	
-	PlotInitial = False
-	PlotPeople = False
 	Calibrate = True
 	SchoolClose = True
-	UseTestRate = 'constant' # 'data' or 'search' or 'constant'
+	# 201001: 'data' untested because only 4 countries have testing data
+	UseTestRate = 'constant' #  'search' or 'constant' or 'data' 
+	UseLogParam = False
+	ParamLogTransformed = ['pop_infected','beta']
+	
+	cmaesSampler = CmaEsSampler()
+	OptunaSampler = cmaesSampler # None
+	
+	PlotInitial = False
+	PlotPeople = False
 	PlotFitMeasures = False
 
-# 	n_trials  = 2
-# 	n_workers = 4
-
- 	OptunaSampler = None
-
-#	cmaesSampler = CmaEsSampler()
-#	OptunaSampler = cmaesSampler
-#	print('** Using cmaesSampler')
-
-	
 	CVNameMap = {'New_Zealand':    'New Zealand',
 				'North_Macedonia': 'The former Yugoslav Republic of Macedonia',
 				'Taiwan':          'Taiwan Province of China'}
@@ -451,6 +653,11 @@ if __name__ == '__main__':
 	educLevelSize = {'h':4, 'w':20, 'c':20, 'sk': 20, 'sp': 20, 'ss': 40 , 'su': 80}
 	# start_day = '2020-01-21'
 	end_day =   '2020-07-31'
+	
+	# all data columns
+	# ['Unnamed: 0', 'key', 'population', 'aggregate', 'cum_diagnoses', 'cum_deaths', 'cum_recovered', 'cum_active', 'cum_tests', 'cum_hospitalized', 'hospitalized_current', 'cum_discharged', 'icu', 'icu_current', 'date', 'day', 'diagnoses', 'deaths', 'tests', 'hospitalized', 'discharged', 'recovered', 'active']
+
+	datacols = ['date','population', 'cum_diagnoses', 'cum_deaths', 'cum_recovered']
 
 	parsCommon = {# 'start_day': start_day,
 					'end_day':  end_day,
@@ -461,21 +668,28 @@ if __name__ == '__main__':
 				   	'asymp_factor': 2,
 					'contacts': educLevelSize,
 					'rescale': True,
-					'verbose': 0. # 0.1,
+					'verbose': 0., # 0.1
+					'datacols': datacols,
+					
+					# NB: need to pass these global variables into create_sim()
+					'useLogParam': UseLogParam,
+					'useTestRate': UseTestRate,
 
 		}
 	
-	to_plot = ['cum_diagnoses', 'cum_deaths', 'cum_tests']
+	to_plot = ['cum_diagnoses', 'cum_deaths']
+	if UseTestRate=='search':
+		 to_plot.append('cum_tests')
 	
 	# totPop data redundant and perhaps inconsistent
 	# but needed to initialize sim: pars['tot_pop'] = tot_pop ?
 	# 2do: replace!
-	
-	totPopFile = dataDir + 'data/pop19Total.csv'
-	totPop = loadTotalPop(totPopFile)
+# 	
+# 	totPopFile = dataDir + 'data/pop19Total.csv'
+# 	totPop = loadTotalPop(totPopFile)
 	
 	interveneFile = dataDir + 'intervene/educ_intervene-uniq.csv'
-	educIntrvn = loadEducIntervn(interveneFile)
+	allEducIntrvn = loadEducIntervn(interveneFile)
 	
 	educEndDateFile = dataDir + 'intervene/educ_end-intervene.csv'
 	educEndDates = loadEndEducDates(educEndDateFile)	
@@ -493,13 +707,17 @@ if __name__ == '__main__':
 	
 	for country in sorted(EducCountryNames):
 
-		if country not in totPop:
-			print('* Missing pop total?!',country)
+		if country not in allEducIntrvn:
+			print('* Missing interventions?!',country)
+			import pdb; pdb.set_trace()
 			continue
 
-		if country not in educIntrvn:
-			print('* Missing interventions?!',country)
-			continue
+		# separate database for cvsim trials data
+		mydbfile = f'{DBDir}{country}-cvsim.db'
+		if os.path.exists(mydbfile):
+			print('DB %s exists; DELETING!' % mydbfile)
+			os.remove(mydbfile)
+		currDB = sqlite.connect(mydbfile)		
 		
 		dbfile = f'{DBDir}{country}.db'
 		if os.path.exists(dbfile):
@@ -508,37 +726,24 @@ if __name__ == '__main__':
 			print('DB %s exists; DELETING!' % dbfile)
 			os.remove(dbfile)
 
-		storage   = f'sqlite:///{dbfile}'
-
-		datafile = ECDPDir + country + '.csv'
-											
 		pars = parsCommon.copy()
 		
-		# ... different start dates ... we find typically 50-500 gives good enough stability
-		pars['start_day'] = findStartDate(datafile,50)
+		storage   = f'sqlite:///{dbfile}'
+		datafile = ECDPDir + country + '.csv'
+											
+		cntyInfo = getCountryInfo(datafile,minInfect=50)
 		
-		tot_pop = totPop[country]
-		
-		# guarantee country is known as part of  covasim.data.country_age_data.get()	
-		# Use location as CV-internal name
-		# 	  country as externally consistent
-		
-# 		CVCountryNames = cad.get().keys()
-# 		if country not in CVCountryNames:
-# 			print('* Mapping country "%s" -> CV "%s"' % (country,CVNameMap[country]))
-# 			pars['location'] = CVNameMap[country]
-# 		else:
-# 			pars['location'] = country
-			
+		pars['start_day'] = cntyInfo['start_date']
+		pars['tot_pop'] = cntyInfo['tot_pop']
+					
 		pars['location'] = country
 		pars['country'] = country
 			
 		pars['datafile'] = datafile
 		pars['storage'] = storage
-		pars['tot_pop'] = tot_pop
 		pop_scale = int(pars['tot_pop']/pars['pop_size'])
 		pars['pop_scale'] = pop_scale
-#		pars['age_dist'] = UNAgeData[country]
+		pars['age_dist'] = UNAgeData[country]
 		pars['interventions'] = []
 			
 		if UseTestRate == 'constant':	
@@ -556,7 +761,7 @@ if __name__ == '__main__':
 		
 		if SchoolClose:
 
-			educIntrvn = educIntrvn[country]
+			educIntrvn = allEducIntrvn[country]
 			
 			if country in educEndDates:
 				endDateSpec =  educEndDates[country]
@@ -570,12 +775,13 @@ if __name__ == '__main__':
 	
 			pars['interventions'] += beta_changes		
 
-		CurrCtnyParams = pars
+		CurrCtnyParams = pars	
 
 		# initial run
 		print(f'Running initial for {country}...')
-		pars, pkeys = get_bounds(CurrCtnyParams['pop_size']) # Get parameter guesses
-		sim = create_sim(pars.best)
+		# pars, pkeys = get_bounds(CurrCtnyParams['pop_size']) # Get parameter guesses
+		pars, pkeys = get_bounds() # Get parameter guesses
+		sim = create_sim(pars.best,CurrCtnyParams)
 		sim.run()
 		
 		if PlotInitial:
@@ -594,17 +800,18 @@ if __name__ == '__main__':
 			print(f'Starting calibration for {country}...')
 			T = sc.tic()
 			
-# 			pars_calib, study = calibrate(sampler=cmaesSampler)
+			print(f'** Sampler={OptunaSampler}')
 			pars_calib, study = calibrate()
+			# pars_calib = calibrate2(currDB)
 	
 			sc.toc(T)
 		
 			# Plot result
 			print('Plotting result...')
-			if UseTestRate=='search':
-				sim = create_sim([pars_calib['beta'], pars_calib['pop_infected'], pars_calib['test_rate']])
-			else:
-				sim = create_sim([pars_calib['beta'], pars_calib['pop_infected']])
+# 			pars2calibList = [pars_calib['pop_infected'],pars_calib['beta']]
+# 			if UseTestRate=='search':
+# 				pars2calibList.append(pars_calib['test_rate'])
+			sim = create_sim(pars_calib,CurrCtnyParams)
 				
 			sim.run()
 			sim.plot(to_plot=to_plot,do_save=True,fig_path=PlotDir + country +'-fit.png')
