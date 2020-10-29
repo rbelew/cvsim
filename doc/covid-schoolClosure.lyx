@@ -1,0 +1,1970 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass achemso
+\begin_preamble
+
+\usepackage[nomarkers,figuresonly]{endfloat}
+
+\author{Richard K. Belew}
+\email{rbelew@ucsd.edu}
+\affiliation{Univ. California -- San Diego\\
+La Jolla CA 92093}
+
+\author{Cliff Kerr}
+\email{ckerr@idmod.org}
+\affiliation{Institute for Disease Modeling, Bellevue, WA}
+
+\author{Jasmina Panovska-Griffiths}
+\email{j.panovska-griffiths@ucl.ac.uk}
+\affiliation{University College London}
+
+\author{Dina Mistry}
+\email{dmistry@idmod.org}
+\affiliation{Institute for Disease Modeling, Bellevue, WA}
+
+\SectionNumbersOn
+
+\pagestyle{myheadings}
+\markboth{Modeling school closures - Draft 28 Oct 20}{Modeling school closures - Draft 28 Oct 20}
+
+% \DeclareBibliographyCategory{cited}
+% \AtEveryCitekey{\addtocategory{cited}{\thefield{entrykey}}}
+% \usepackage{filecontents}
+% \nocite{*}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing double
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "urlcolor=black"
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\notefontcolor #0000ff
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Modeling school closures across 35 countries
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+
+\emph on
+Draft: 28 October 2020
+\end_layout
+
+\begin_layout Abstract
+COVID-19 continues to spread around the world and modeling plays an important
+ role in informing policy.
+ An individual-based model called Covasim has recently been fit to data
+ regarding confirmed cases and deaths experience in the United Kingdom during
+ the first half of 2020, and then used it to evaluate alternative intervention
+ strategies there 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jpg20"
+literal "false"
+
+\end_inset
+
+.
+ We extend this methodology to consider data from 35 other countries, and
+ use a database of international intervention specifics called the 
+\begin_inset CommandInset href
+LatexCommand href
+name "COVID-19 CONTROL STRATEGIES LIST"
+target "http://covid19-interventions.com/"
+literal "false"
+
+\end_inset
+
+ to retrospectively model interventions employed in these countries.
+ Because the age distribution of populations is a key feature of the COVID-19
+ pandemic and contacts among young people are often age-stratified and may
+ play an especially important role, we focus here on school closure intervention
+s.
+\end_layout
+
+\begin_layout Abstract
+Individual countries varied considerably in both the dates on which they
+ imposed school closings, and in the levels (kindergarten, primary, secondary,
+ university) specified.
+ Critically, the age-stratified sub-populations supported by Covasim allow
+ fine-grained specification of just those individuals affected by school
+ closures at each educational level.
+ Across the 35 countries the model was calibrated to the country's epidemic,
+ simulations were first run without the intervention, and data on confirmed
+ cases and deaths was used to fit key Covasim parameters.
+ Next, specific intervention strategies employed by each country were converted
+ into specifications for Covasim, and the same simulation parameters fit
+ to a second model with the interventions considered.
+ In the 10 countries where there was a significant difference between models,
+ those incorporating school closures were considerably better fits than
+ those without.
+ Since both models' parameters are optimized and evaluated using the same
+ criterion, improved fit with the intervention model may be taken as evidence
+ that the modeled interventions were useful, at least in these 10 countries,
+ in describing observed data.
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Paragraph*
+Comparisons between countries are essential for the control of COVID-19
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1001/jama.2020.6585"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Although international comparisons are often disparaged because of different
+ data quality and fears of the ‘ecological fallacy’, if done carefully they
+ can play a major role in our learning what works best for controlling COVID-19.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1093/ije/dyaa108"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+...
+ the COVID-19 epidemic shows the need for epidemiology to go back to its
+ roots—thinking about populations.
+ Studying disease occurrence by person, place and time (often referred to
+ as ‘descriptive epidemiology’) is usually taught in introductory courses,
+ even if this approach is then paid little attention subsequently.
+ COVID-19 is a striking example of how we can learn a great deal from comparing
+ countries, states, regions, time trends and persons, despite of all the
+ difficulties.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1093/ije/dyaa108"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With travel restrictions as they were in the spring and summer of 2020,
+ levels of migration across national borders are considerably smaller than
+ that across state or provincial boundries.
+ In some countries, school closures were ordered only within particular
+ states.
+ For these reasons, and given the data currently available, only models
+ at the level of individual countries and interventions ordered nationally
+ are considered here.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Predictive models for large countries, such as the US, are even more problematic
+ because they aggregate heterogeneous subepidemics in local areas....
+ Models should also seek to use the best possible data for local predictions.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1001/jama.2020.6585"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The goal of this 
+\emph on
+post hoc
+\emph default
+ analysis of historical data is to understand the limits of our modeling
+ tools as we move forward to use them for predictive tasks.
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Subsection
+Incorporating school closure interventions
+\end_layout
+
+\begin_layout Standard
+The goal of Covasim optimization, with respect to each individual country,
+ is to minimize the difference between the model and data about the number
+ of diagnosed cases of, and deaths caused by, COVID.
+ The objective measure used for optimization is to minimize sum-squared-differen
+ce (SSD) 
+\begin_inset Quotes eld
+\end_inset
+
+fit value
+\begin_inset Quotes erd
+\end_inset
+
+ between both of these.
+ As data regarding deaths is believed to generally more accurate than that
+ about positive tests, SSD over death rates is weighted twice that of diagnoses.
+ In the experiments reported in this section, model calibration was allowed
+ to vary three parameters: the number of initial infectsion, beta, and in
+ some experiments, also testing rate.
+\end_layout
+
+\begin_layout Standard
+The basic experiment is to contrast runs with and with the intervention
+ of school closures modeled.
+ As a first example, Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Sample-countries"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the curves for New Zealand, Singapore and Malaysia, three countries
+ with large improvements in model fit.
+ In the case of New Zealand, fit with both death and diagnosis data was
+ improved considerably; in Singapore and Malaysia the improvement was primarily
+ with respect to death data.
+ The New Zealand model with school closures uses a similar value for beta
+ but a much smaller initial infected (1161 vs.
+ 11450) and a much larger testing rate (0.063 vs.
+ .001); Singapore reduced beta slightly (2.64e-3 vs.
+ 4.19e-3), a much smaller initial infected (1048 vs.
+ 10825), and less testing (0.247 vs.
+ 0.386).
+ The Malaysian model with school closures was able to fit much better with
+ quite similar values for all three parameters.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/sampleCountries-sm.png
+	lyxscale 5
+	height 80pheight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Sample-countries"
+
+\end_inset
+
+Sample countries
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:All-country-statistics"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ provides complete statistics for all 35 countries.
+ The countries have been sorted on the difference in fit value between the
+ two models, one incorporating school closure interventions and one without
+ these.
+ Taiwain has proven a difficult country to model, under many experimental
+ conditions.
+ With this exception, New Zealand, Singapore and Malaysie are at the top
+ of the list.
+ Several cells have been highlighted with orange when they are at maximal
+ bounded values, and with yellow when they are at minimum bounds.
+ These will be discussed further in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Bounding-search"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/comp-intrv:non-searchData-summary.png
+	lyxscale 25
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:All-country-statistics"
+
+\end_inset
+
+All country statistics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Improved-fit"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the range of differences in fit value between these two conditions.
+ The model for Taiwan is very poor in both conditions.
+ For 14 countries, the difference between the two modesl was small, < 100.
+ Of the remaining 20 countries where there was a significant difference
+ between models, in 16 cases those incorporating school closures were better
+ fits than those without.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/improvedFit-testSearch-annote.png
+	lyxscale 25
+	width 75page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Improved-fit"
+
+\end_inset
+
+Improved fit
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Anomolous-countries"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the pairs of models for three other countries of potential interest:
+ Romania had an improvement in fit with the incorporation of school closures
+ that is just better than 100.
+ The Lithuanian model had very good fit without school closures and was
+ poorer when this was included.
+ Again, no successful models of Taiwan were found in either case.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/otherCountries-sm.png
+	lyxscale 5
+	height 80pheight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Anomolous-countries"
+
+\end_inset
+
+Other countries
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Model calibration
+\end_layout
+
+\begin_layout Subsubsection
+Stochastic repliction
+\end_layout
+
+\begin_layout Standard
+The question of how stochastic factors within Covasim vary the results of
+ simulations is an important first question, because no optimizer can do
+ well if it is based on noisy results.
+\end_layout
+
+\begin_layout Standard
+A series of n=8 replications of the same simulation were run with the same
+ parameters.
+ Happily, the range of results across multiple runs shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:stochRepl"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+(produced via 
+\noun on
+multisim.??.reduce()
+\noun default
+)
+\end_layout
+
+\end_inset
+
+ shows very tight bounds across the mean value.
+ (The standard deviation bars around diagnoses is so small has to be barely
+ visible.)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/Austria-reduce.png
+	lyxscale 25
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:stochRepl"
+
+\end_inset
+
+Stochastic replication
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:stochComp"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the results across all simulation measures 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+as produced by multisim.??.compare()
+\end_layout
+
+\end_inset
+
+.
+ Again, very consistent results across runs are shown in every measure.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/Austria-comp.png
+	lyxscale 25
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:stochComp"
+
+\end_inset
+
+Comparing stochastic results
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Global optimization
+\end_layout
+
+\begin_layout Standard
+Many modeling efforts now depend on an optimization component that identifies
+ best values for key parameters.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+(cites...)
+\end_layout
+
+\end_inset
+
+ This means that there is no guarantee of finding the actual optimal value
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Papadimitriou15881"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+All such optimizations generate several new questions: 
+\end_layout
+
+\begin_layout Itemize
+How much effort should be put into the search? Ie, how much value is there
+ in extending computational effort towards improved results? What sort of
+ reward is given for deeper search?
+\end_layout
+
+\begin_layout Itemize
+Conversely, what makes a solution 
+\begin_inset Quotes eld
+\end_inset
+
+good enough
+\begin_inset Quotes erd
+\end_inset
+
+?
+\end_layout
+
+\begin_layout Itemize
+Since we may have multiple criteria for good solutions, how can we determine
+ the Pareto-optimal combination? For example caring to match both death
+ data and diagnosis data, how do we determine the Pareto optimal combination?
+\end_layout
+
+\begin_layout Subsubsection
+Search dynamics
+\end_layout
+
+\begin_layout Paragraph
+The value surface
+\end_layout
+
+\begin_layout Standard
+In the experiments reported here we will generate a sample of 2500 trials
+ of particular parameter pairs of initial infection and beta.
+ The samples were generated by a CMAES search initiated with the bounds
+ shown and initialized at the location of the red plus sign.
+ 
+\end_layout
+
+\begin_layout Standard
+On the left is a plot showing all sample points with darker blues indicating
+ better fit values, a red plus sign showing the initial search parameter,
+ and a green X showing the labeled best value found.You need to look closely
+ but you can see several good value 
+\begin_inset Quotes eld
+\end_inset
+
+ridges
+\begin_inset Quotes erd
+\end_inset
+
+ that have been sampled more densely.
+ On the right is a more detailed contour plot showing an interpolated surface
+ across these samples.
+ It shows a highly texturued, multi-modal region near the discovered optimum.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/values_testSearch_intrv.png
+	lyxscale 10
+	height 3in
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/contour_testSearch_intrv.png
+	lyxscale 10
+	height 3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:valueSurface"
+
+\end_inset
+
+Value surface
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The cells highlighted in the table of Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:All-country-statistics"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ correspond to values at or very near bounds imposed on the search, orange
+ for values of beta or initial infection near the upper bound, and yell
+ for values near their lower bound.
+\end_layout
+
+\begin_layout Paragraph
+Convergence to value optimum
+\end_layout
+
+\begin_layout Standard
+The samples were generated adaptively, towards better solutions across 
+\begin_inset Quotes eld
+\end_inset
+
+populations
+\begin_inset Quotes erd
+\end_inset
+
+ of size 100, in a series of 25 "generations." The progression of this search
+ process can be tracked according to several key statistics as they vary
+ over generations.
+\end_layout
+
+\begin_layout Standard
+A first statistic is the model fit value parameter shown In Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:valueConverge"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ This shows fit value average, together with standard deviation bars.
+ The later generations 10-25 have been broken out in an inset graph, the
+ better to see the smaller values.
+ After dramatic early improvements, model fit does not improve much after
+ about 12 generations.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/val_testSearch_intrv.png
+	lyxscale 50
+	height 3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:valueConverge"
+
+\end_inset
+
+Value convergence
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Beta leads initialInfections
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:parameterConverge"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ considers the values of beta and initial infection independently.
+ Values of beta converge more quickly and have stabilized by about generation
+ 10.
+ Values of initial infection continue to increase throughout all generations.
+ Note in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:valueConverge"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, however, that increasing initial infections does not change model fit
+ much.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/beta_testSearch_intrv.png
+	lyxscale 50
+	width 40page%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/infect_testSearch_intrv.png
+	lyxscale 50
+	width 40page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:parameterConverge"
+
+\end_inset
+
+Parameter convergence
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Deaths dominate diagnoses
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:deathDiagn"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ looks at the component measures on which model fits is evaluated: match
+ with death data and match with diagnosis data.
+ As expected, because it is weighted more heavily, matching death data drives
+ the search.
+ It is interesting to note that improvement with respect to in the two separate
+ values (diagneses and death) is well correlated across the generations
+ of the search.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/cum_deaths_mismatch_testSearch_intrv.png
+	lyxscale 50
+	width 40page%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/cum_diagnoses_mismatch_testSearch_intrv.png
+	lyxscale 50
+	width 40page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:deathDiagn"
+
+\end_inset
+
+Independent deaths and diagnoses
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Bounding-search"
+
+\end_inset
+
+Bounding search
+\end_layout
+
+\begin_layout Standard
+As mentioned earlier, global optimization procedures generally require bounds
+ within which they are to search.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:valueSurface-large"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ can be compared to that originally shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:valueSurface"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ Here a range of initial infection sizes twice as large (50000 vs 25000)
+ was allowed in the search.
+ Again, the first plot shows similar ridges leading from the initial starting
+ value, to an optima with about the same number of initial infections but
+ a smaller beta.
+ A second, vertical ridge is indicated leading to the very top boundary
+ imposed by the a priori constraint.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/values_Trials_201008-2.png
+	lyxscale 10
+	height 3in
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/contour_Trials_201008-2.png
+	lyxscale 10
+	height 3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:valueSurface-large"
+
+\end_inset
+
+Values across larger bounded region
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Back-of-the-envelope calculations regarding possible values for initial
+ infections
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+r0 = number of contacts * days infectious * infection probability per contact
+ per day so if we assume r0 = 2, 20 contacts, 8 days infectious, we get
+ beta = 0.0125 [Cliff, 3 Oct]
+\end_layout
+
+\end_inset
+
+ suggests that the second, upper attractor containing the optimum in this
+ experiment should be discounted as implausible.
+ 
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+That's why the primary experiments that are the focus of the results above!
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+There is a clear bifurcation shown in the second contour plot.
+ The lower upper bound on initial infection (25000) was selected to force
+ search to include only the lower attractor.
+ 
+\end_layout
+
+\begin_layout Subsection
+Using data for testing rate
+\end_layout
+
+\begin_layout Standard
+Rather than asking the optimization process to select a best testing rate,
+ data from OWID can be used instead.
+ 
+\end_layout
+
+\begin_layout Standard
+Experiments alternating the two possible sources for testing rates, data
+ or search, are summarized in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:testingSearchVData"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ In all cases, allowing search to establish the parameter value produced
+ better fitting models.
+ This is to be expected, as a new free parameter has been allowed.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/comp-data:search-intrv-summary.png
+	lyxscale 50
+	height 8in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:testingSearchVData"
+
+\end_inset
+
+Testing rate via search vs.
+ data
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:testingNZ"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows contrasting results for the case of New Zealand using search versus
+ data for testing rate.
+ The optimized value for testing rate shows an enormous number of tests
+ performed, relative to available data.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/comp-data:search-intrv-NewZealand.png
+	lyxscale 30
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:testingNZ"
+
+\end_inset
+
+Testing search vs.
+ data in New Zealand
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the improvement allowed with testing rate as free parameter is
+ despite the error with respect to available data having no consequence
+ in Pareto-optimum calculation, since it is given a zero weight.
+\end_layout
+
+\begin_layout Section
+Methods
+\end_layout
+
+\begin_layout Subsection
+Data sources
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/dataSources.png
+	lyxscale 50
+	height 3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Data-sources"
+
+\end_inset
+
+Data sources
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+OurWorldInData 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "owidcoronavirus"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "Covid-19 Control Strategies List"
+target "https://github.com/amel-github/covid19-interventionmeasures"
+literal "false"
+
+\end_inset
+
+, developed by Amélie Desvars-Larrive and colleagues [
+\begin_inset CommandInset href
+LatexCommand href
+name "Complexity Science Hub Vienna"
+target "https://www.csh.ac.at"
+literal "false"
+
+\end_inset
+
+] 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/educ_intervene-uniq.png
+	lyxscale 50
+	height 3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Intervention-dates-and"
+
+\end_inset
+
+Intervention dates and educational levels
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Covasim
+\end_layout
+
+\begin_layout Standard
+Covasim 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kerr2020.05.10.20097469"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Optuna 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1145/3292500.3330701"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Tree-Structured Parzen Estimator 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1145/3377930.3389817"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+CMAEvolution 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hansen2016cma"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Did not make use of SynthPop
+\end_layout
+
+\begin_layout Subsection
+Key details
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+self.weights = sc.mergedicts({'cum_deaths':10, 'cum_diagnoses':5}, weights)
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+educLevelSize = {'h':4, 'w':20, 'c':20, 'sk': 20, 'sp': 20, 'ss': 40 , 'su':
+ 80}
+\end_layout
+
+\begin_layout Itemize
+Only countries with populations > 1e6 were considered.
+\end_layout
+
+\begin_layout Itemize
+Only countries with educational interventions coming after at least one
+ week of diagnoses and death data were considered.
+ For example, while both Ghana and Mauritius had school closures, but data
+ on diagnoses and deaths was not available for a week before the dates of
+ their closures.
+\end_layout
+
+\begin_layout Itemize
+Simulation start date picked when number of infections becomes > 50
+\end_layout
+
+\begin_layout Itemize
+Each educational level (kindergarten, primary, secondary, university) was
+ treated as a separate 
+\begin_inset Quotes eld
+\end_inset
+
+layer
+\begin_inset Quotes erd
+\end_inset
+
+ by Covasim and captured into separate age ranges within the total population.
+ This allows interventions at different educational levels to be treated
+ independently.
+ 
+\end_layout
+
+\begin_layout Itemize
+Each school closure at any educational level is modeled as a simple on/off:
+ school closings start on a specified date, infection rate was set very
+ low (
+\family typewriter
+ClosedSchoolBeta = 0.02
+\family default
+) for children in each age group associated with the educational level,
+ and are assumed to be in effect until an end-of-closure date.
+\end_layout
+
+\begin_layout Itemize
+In a small number (6 of 35) of cases, the Covid-19 Control Strategies List
+ contained a specific 
+\emph on
+end
+\emph default
+ for the school closure; for these countries that date was used to end the
+ intervention.
+ Otherwise, a default 
+\family typewriter
+SchoolOutDate = 2020-06-01
+\family default
+ was used.
+\end_layout
+
+\begin_layout Subsubsection
+Age distribution
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+educLevel_ages = {'sk': [4,5], 'sp': [6,10], 'ss': [11,18], 'su': [19,24]}
+\end_layout
+
+\begin_layout Standard
+The distinguished age cohorts associated with school levels is shown in
+ Figure 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/Malaysia-people.png
+	lyxscale 5
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:PopAgeDist"
+
+\end_inset
+
+Population age distribution
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Model calibration
+\end_layout
+
+\begin_layout Standard
+An outer-loop of software based on Optuna exists to allow 
+\begin_inset Quotes eld
+\end_inset
+
+calibration
+\begin_inset Quotes erd
+\end_inset
+
+ of Covasim models with respect to key parameters.
+ It supports both TFE and CMAES optimization techniques.
+\end_layout
+
+\begin_layout Standard
+Population size is a convenient way to broaden the search so as to reduce
+ sampling error.
+ The CMA library has a 
+\begin_inset Quotes eld
+\end_inset
+
+tell-ask
+\begin_inset Quotes erd
+\end_inset
+
+ interface that allows easy bundling of parallel executions.
+\end_layout
+
+\begin_layout Standard
+We optimize over two parameters, 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and the number of initial infections, and in some cases a third, the assumed
+ testing rate.
+ 
+\end_layout
+
+\begin_layout Standard
+NTrial=100 trials were allocated to find the search for parameter values
+ causing the model to best fit the data.
+\end_layout
+
+\begin_layout Section
+Next steps
+\end_layout
+
+\begin_layout Subsection
+Model validation
+\end_layout
+
+\begin_layout Enumerate
+{lauerReich20}: Infectious Disease Forecasting for Public Health 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lauerReich20"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+{bergmeir18}:A note on the validity of cross-validation for evaluating autoregre
+ssive time series prediction 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "bergmeir18"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+{bergmeirBenitez12}: On the use of cross-validation for time series predictor
+ evaluation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "bergmeirBenitez12"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Integration of genomic data: molecular epidemiology
+\end_layout
+
+\begin_layout Itemize
+Rockett 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rockett:2020uf"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+examine the added value of near real-time genome sequencing of SARS-CoV-2
+ in a subpopulation of infected patients during the first 10 weeks of COVID-19
+ containment in Australia and compare findings from genomic surveillance
+ with predictions of a computational agent-based model (ABM)
+\end_layout
+
+\begin_layout Enumerate
+based on AceMOD
+\end_layout
+
+\begin_layout Enumerate
+21 January and 28 March 2020, 1,617 cases of COVID- 19 were diagnosed and
+ reported to the NSW Ministry of Health.
+ All patients resided in metropolitan Sydney.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Subsection
+Honest priors
+\end_layout
+
+\begin_layout Itemize
+Bounds; bounded optimization
+\end_layout
+
+\begin_layout Itemize
+testing rates
+\end_layout
+
+\begin_layout Itemize
+What accuracy can we claim for model parameter estimation?
+\end_layout
+
+\begin_layout Subsection
+Scientific sharing, publishing and open source models
+\end_layout
+
+\begin_layout Itemize
+The expressive power of agent-based models allows evaluation of many interventio
+n strategies 
+\end_layout
+
+\begin_layout Itemize
+Open source modeling systems like Covasim allow independent model components
+ to be investigated and incorporated separately 
+\end_layout
+
+\begin_layout Itemize
+The publishing of full model implementation, like that included with the
+ [Panovska-Griffiths] publication is an excellent example 
+\end_layout
+
+\begin_layout Itemize
+Fast-paced scientific sharing like that demanded by COVID-19 is catalyzed
+ by such interactions
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "covid"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
