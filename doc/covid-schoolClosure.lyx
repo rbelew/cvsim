@@ -11,8 +11,7 @@
 
 \author{Richard K. Belew}
 \email{rbelew@ucsd.edu}
-\affiliation{Univ. California -- San Diego\\
-La Jolla CA 92093}
+\affiliation{Univ. California -- San Diego, La Jolla CA}
 
 \author{Cliff Kerr}
 \email{ckerr@idmod.org}
@@ -29,7 +28,7 @@ La Jolla CA 92093}
 \SectionNumbersOn
 
 \pagestyle{myheadings}
-\markboth{Modeling school closures - Draft 28 Oct 20}{Modeling school closures - Draft 28 Oct 20}
+\markboth{Generalized models of 136 countries - Draft 25 Dec 20}{Generalized models of 136 countries - Draft 25 Dec 20}
 
 % \DeclareBibliographyCategory{cited}
 % \AtEveryCitekey{\addtocategory{cited}{\thefield{entrykey}}}
@@ -125,7 +124,7 @@ customHeadersFooters
 \begin_body
 
 \begin_layout Title
-Modeling school closures across 35 countries
+Generalized modeling of interventions across 136 countries
 \end_layout
 
 \begin_layout Standard
@@ -133,12 +132,20 @@ Modeling school closures across 35 countries
 \align center
 
 \emph on
-Draft: 28 October 2020
+Draft: 25 December 2020
 \end_layout
 
 \begin_layout Abstract
 COVID-19 continues to spread around the world and modeling plays an important
- role in informing policy.
+ role in informing policy 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Press1015"
+literal "false"
+
+\end_inset
+
+.
  An individual-based model called Covasim has recently been fit to data
  regarding confirmed cases and deaths experience in the United Kingdom during
  the first half of 2020, and then used it to evaluate alternative intervention
@@ -151,43 +158,64 @@ literal "false"
 \end_inset
 
 .
- We extend this methodology to consider data from 35 other countries, and
- use a database of international intervention specifics called the 
-\begin_inset CommandInset href
-LatexCommand href
-name "COVID-19 CONTROL STRATEGIES LIST"
-target "http://covid19-interventions.com/"
-literal "false"
-
-\end_inset
-
- to retrospectively model interventions employed in these countries.
+ We extend this methodology to consider data from 136 countries for which
+ intervention data is available to retrospectively model interventions employed
+ in these countries.
  Because the age distribution of populations is a key feature of the COVID-19
  pandemic and contacts among young people are often age-stratified and may
  play an especially important role, we focus here on school closure intervention
 s.
+ For 87 of the countries evaluated there is also data concerning testing
+ rates in each country that can be compared to other estimates.
 \end_layout
 
 \begin_layout Abstract
-Individual countries varied considerably in both the dates on which they
- imposed school closings, and in the levels (kindergarten, primary, secondary,
- university) specified.
- Critically, the age-stratified sub-populations supported by Covasim allow
- fine-grained specification of just those individuals affected by school
- closures at each educational level.
- Across the 35 countries the model was calibrated to the country's epidemic,
- simulations were first run without the intervention, and data on confirmed
- cases and deaths was used to fit key Covasim parameters.
- Next, specific intervention strategies employed by each country were converted
- into specifications for Covasim, and the same simulation parameters fit
- to a second model with the interventions considered.
- In the 10 countries where there was a significant difference between models,
- those incorporating school closures were considerably better fits than
- those without.
- Since both models' parameters are optimized and evaluated using the same
- criterion, improved fit with the intervention model may be taken as evidence
- that the modeled interventions were useful, at least in these 10 countries,
- in describing observed data.
+A Covasim model was calibrated for each of 136 countries, with each country's
+ population, age distribution, disease emergence and school closing dates
+ specified, then calibrated against data concerning COVID-19 diagnosed cases
+ and related deaths.
+ All countries' simulations were run with and without school interventions.
+ The hypothesis considered is: Does incorporating the additional knowledge
+ of school interventions into a model makes it a better predictor of data
+ concerning diagnoses and deaths?
+\end_layout
+
+\begin_layout Abstract
+Because assumptions regarding background testing rates being performed are
+ critical for interpretation of statistics regarding the number of diagnosed
+ patients, three conditions were considered: assume the same 
+\emph on
+fixed
+\emph default
+ testing rated for all countries; 
+\emph on
+searching
+\emph default
+ for an estimated testing rate as part of model calibration; and use 
+\emph on
+data
+\emph default
+ for the 87 countries that have this data available.
+ 
+\end_layout
+
+\begin_layout Abstract
+An analysis of the global optimization used to calibrate these models to
+ parameters is considered in detail.
+ General lessons for using and interpreting automatic parameter calibration
+ methods are suggested.
+ The main difficulty, of course, is in establishing what makes one model
+ a 
+\emph on
+significantly
+\emph default
+ better predictor.
+ For now at least we can 
+\emph on
+not
+\emph default
+ reject the null hypothesis: As a general rule, adding school interventions
+ can not be shown to improve the model.
 \end_layout
 
 \begin_layout Section
@@ -195,7 +223,19 @@ Introduction
 \end_layout
 
 \begin_layout Paragraph*
-Comparisons between countries are essential for the control of COVID-19
+COVID-19 continues to spread around the world and modeling plays an important
+ role in informing policy 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Press1015"
+literal "false"
+
+\end_inset
+
+.
+ Here we use a broad range of countries' experiences to identify robust
+ results common across them.
+ Comparisons between countries are essential for the control of COVID-19
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -276,18 +316,6 @@ end{quotation}
 \end_layout
 
 \begin_layout Standard
-With travel restrictions as they were in the spring and summer of 2020,
- levels of migration across national borders are considerably smaller than
- that across state or provincial boundries.
- In some countries, school closures were ordered only within particular
- states.
- For these reasons, and given the data currently available, only models
- at the level of individual countries and interventions ordered nationally
- are considered here.
- 
-\end_layout
-
-\begin_layout Standard
 \begin_inset ERT
 status open
 
@@ -305,7 +333,7 @@ begin{quotation}
 
 \begin_layout Standard
 Predictive models for large countries, such as the US, are even more problematic
- because they aggregate heterogeneous subepidemics in local areas....
+ because they aggregate heterogeneous sub-epidemics in local areas....
  Models should also seek to use the best possible data for local predictions.
  
 \begin_inset CommandInset citation
@@ -335,7 +363,31 @@ end{quotation}
 \end_layout
 
 \begin_layout Standard
-The goal of this 
+With travel restrictions as they were in the spring and summer of 2020,
+ levels of migration across national borders were considerably smaller than
+ that across state or provincial boundaries.
+ Given the data currently available, only models at the level of individual
+ countries and interventions ordered nationally are considered here.
+ 
+\end_layout
+
+\begin_layout Standard
+Because the age distribution of populations is a key feature of the COVID-19
+ pandemic and contacts among young people are often age-stratified and may
+ play an especially important role, we focus here on school closure intervention
+s.
+ Because global optimization of simulation parameters is a common aspect
+ of many modeling efforts 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1371/journal.pcbi.1007893"
+literal "false"
+
+\end_inset
+
+, we evaluate the optimization process implemented using the CMA-ES process
+ in some detail.
+ The goal of this 
 \emph on
 post hoc
 \emph default
@@ -347,73 +399,108 @@ post hoc
 Results
 \end_layout
 
-\begin_layout Subsection
-Incorporating school closure interventions
-\end_layout
-
 \begin_layout Standard
-The goal of Covasim optimization, with respect to each individual country,
- is to minimize the difference between the model and data about the number
- of diagnosed cases of, and deaths caused by, COVID.
- The objective measure used for optimization is to minimize sum-squared-differen
-ce (SSD) 
+The first section below reports on 
 \begin_inset Quotes eld
 \end_inset
 
-fit value
+base model
 \begin_inset Quotes erd
 \end_inset
 
- between both of these.
- As data regarding deaths is believed to generally more accurate than that
- about positive tests, SSD over death rates is weighted twice that of diagnoses.
- In the experiments reported in this section, model calibration was allowed
- to vary three parameters: the number of initial infectsion, beta, and in
- some experiments, also testing rate.
-\end_layout
-
-\begin_layout Standard
-The basic experiment is to contrast runs with and with the intervention
- of school closures modeled.
- As a first example, Figure 
+ experiments that do 
+\emph on
+not
+\emph default
+ include school intervention and which use a 
+\emph on
+fixed
+\emph default
+ testing rate (=3.3e-4, the average across all countries with testing data;
+ cf.
+ Section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:Sample-countries"
+reference "subsec:dataTR"
 plural "false"
 caps "false"
 noprefix "false"
 
 \end_inset
 
- shows the curves for New Zealand, Singapore and Malaysia, three countries
- with large improvements in model fit.
- In the case of New Zealand, fit with both death and diagnosis data was
- improved considerably; in Singapore and Malaysia the improvement was primarily
- with respect to death data.
- The New Zealand model with school closures uses a similar value for beta
- but a much smaller initial infected (1161 vs.
- 11450) and a much larger testing rate (0.063 vs.
- .001); Singapore reduced beta slightly (2.64e-3 vs.
- 4.19e-3), a much smaller initial infected (1048 vs.
- 10825), and less testing (0.247 vs.
- 0.386).
- The Malaysian model with school closures was able to fit much better with
- quite similar values for all three parameters.
+).
+ Experiments contrasting models searching for the testing rate, and ones
+ using data for testing rate are in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:dataTR"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ Experiments contrasting the base model against simulations including school
+ interventions are considered in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Incorporating-school-closure"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsection
+Base model
+\end_layout
+
+\begin_layout Standard
+Covasim defines the value of a model's fit to be a weighted sum of the error
+ between its predicted number of diagnoses and deaths related to COVID-19
+ and data for these values.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:base-fit"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the range of resulting model fits across all 136 countries, with
+ lower fitness scores assigned to simulations with a better match of predictions
+ for the number of diagnoses and deaths.
+ There is not any absolute criterion as to what makes for a 
+\begin_inset Quotes eld
+\end_inset
+
+good
+\begin_inset Quotes erd
+\end_inset
+
+ fit, but 130 countries have fit values less than 500.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/sampleCountries-sm.png
-	lyxscale 5
-	height 80pheight%
+	filename figs/base-modelFit.png
+	lyxscale 20
+	width 80page%
 
 \end_inset
 
@@ -426,11 +513,11 @@ status open
 \begin_layout Plain Layout
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:Sample-countries"
+name "fig:base-fit"
 
 \end_inset
 
-Sample countries
+Base model fits
 \end_layout
 
 \end_inset
@@ -447,27 +534,23 @@ Sample countries
 Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:All-country-statistics"
+reference "fig:base-examples"
 plural "false"
 caps "false"
 noprefix "false"
 
 \end_inset
 
- provides complete statistics for all 35 countries.
- The countries have been sorted on the difference in fit value between the
- two models, one incorporating school closure interventions and one without
- these.
- Taiwain has proven a difficult country to model, under many experimental
- conditions.
- With this exception, New Zealand, Singapore and Malaysie are at the top
- of the list.
- Several cells have been highlighted with orange when they are at maximal
- bounded values, and with yellow when they are at minimum bounds.
- These will be discussed further in Section 
+ shows the result of the simulation for two countries, COL and LAO.
+ For each country, the top two plots capture model behavior relative to
+ data for the number of diagnoses across the time interval considered.
+ The bottom plot simply shows the number of tests that would have been given
+ over time, assuming the fixed testing rate and country's population; it
+ isn't useful in this basic model but will provide contrast in Sections
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "subsec:Bounding-search"
+reference "subsec:dataTR"
 plural "false"
 caps "false"
 noprefix "false"
@@ -475,6 +558,35 @@ noprefix "false"
 \end_inset
 
 .
+ COL and LAO were selected as being a particularly good 
+\begin_inset Quotes eld
+\end_inset
+
+fit
+\begin_inset Quotes erd
+\end_inset
+
+ with the data (COL), and particularly bad (LAO).
+ Note that this should be considered the 
+\begin_inset Quotes eld
+\end_inset
+
+best fit found
+\begin_inset Quotes erd
+\end_inset
+
+ with respect to the calibration optimization over the two free parameters,
+ 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\noun on
+initInfect
+\noun default
+, the number of initial infections, and using sum-squared-error as the measure
+ of mismatch.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -487,8 +599,101 @@ status collapsed
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/comp-intrv:non-searchData-summary.png
-	lyxscale 25
+	filename figs/base-COL-fit.png
+	lyxscale 10
+	width 40page%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/base-LAO-fit.png
+	lyxscale 10
+	width 40page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:base-examples"
+
+\end_inset
+
+Base model: COL and LAO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Using available data for testing rate
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:dataTR"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For 87 countries there exists data on testing rates via OWID.
+ Experiments using this source for testing rates can be compared to using
+ a fixed testing rate, and to rates found via calibration.
+\end_layout
+
+\begin_layout Subsubsection
+Comparing data against fixed testing rate
+\end_layout
+
+\begin_layout Standard
+Using data-based testing rates vs.
+ the fixed rate is as likely to improve as harm the model.
+ As shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:fixData-trRatioVfit"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, while there seems a general trend towards increased testing rates improving
+ fit, the correlation is not strong (
+\begin_inset Formula $r^{2}=0.37$
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/compData_201203_fitVtrRatio.png
+	lyxscale 30
 	width 80page%
 
 \end_inset
@@ -502,11 +707,1431 @@ status collapsed
 \begin_layout Plain Layout
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:All-country-statistics"
+name "fig:fixData-trRatioVfit"
 
 \end_inset
 
-All country statistics
+Model fit related to data vs.
+ fixed testing rate
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Comparing data against calibrated testing rate
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:searchDataTR"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the log ratio 
+\begin_inset Formula $log(\frac{testRate_{data}}{testRate_{search}})$
+\end_inset
+
+ of the testing rate from data vs.
+ search for all countries.
+ In most cases the testing rate identified via search is lower, and sometimes
+ much lower, than that provided in data; i.e., most countries are below the
+ line showing the ratio=1.0.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/searchData_201221_trRatio.png
+	lyxscale 30
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:searchDataTR"
+
+\end_inset
+
+Search vs.
+ data for testing rate - all countries
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Three countries, BGR,CHE and NGA, sampled from across the range of results,
+ have been highlighted.
+ Comparisons of model results for these countries is shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:searchData-examples"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, and details are provided in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Search-vs.-data"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:searchData-BGR-comp"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows how 
+\emph on
+daily
+\emph default
+ testing data compares to the constant (average) testing 
+\emph on
+rate
+\emph default
+ identified via search for BGR; note that BGR has a data/search testing
+ rate ratio near 1.0.
+ Nevertheless search's slightly higher testing rate allows an improved value
+ due to a better match with diagnosis data.
+ In the CHE models, using data for testing rates improved the fit considerably
+ (although barely noticeable in the plotted curves).
+ With NGA, on the other hand, using a much larger testing rate than in the
+ data finds only a slightly better model fit.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/searchData_201221_examples.png
+	lyxscale 10
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:searchData-examples"
+
+\end_inset
+
+Search vs.
+ data testing rates for BGR, CHE and NGA
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="10">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Search
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Data
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ISO3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+trRatio
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+infect
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+beta
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+testrate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+infect
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+beta
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+testrate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+BGR
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.07E+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1418
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+5.34E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.42E-4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+231
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1539
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+5.13E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.59E-4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+131
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+CHE
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+3.85E+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+42012
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+3.70E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.12E-4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+576
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+34946
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+4.00E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+4.33E-4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+62
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+NGA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.74E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+32249
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+4.62E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.59E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+193
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+9740
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+4.81E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+7.10E-6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+225
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Search-vs.-data"
+
+\end_inset
+
+Search vs.
+ data for testing rate - example countries
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/BGR_testRate-searchData.png
+	lyxscale 30
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:searchData-BGR-comp"
+
+\end_inset
+
+Testing rate from search vs.
+ data for BGR
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Overall, using data-based testing rates with a model improved their fit
+ somewhat, in comparison to the value found via calibration search; average
+ improvement ~ 100
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Note that 
+\begin_inset Quotes eld
+\end_inset
+
+improvement
+\begin_inset Quotes erd
+\end_inset
+
+ by data-based models is reflected in negative differences in value, since
+ smaller values reflect better models.
+\end_layout
+
+\end_inset
+
+.
+ As shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:searchData-trRatioVfit"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, while there seems a general trend towards increased testing rates improving
+ fit, the correlation is not strong (
+\begin_inset Formula $r^{2}=0.34$
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/searchData_201221_trVfit.png
+	lyxscale 30
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:searchData-trRatioVfit"
+
+\end_inset
+
+Model fit related to data/search testing rate
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the difference between predicted testing rate and data regarding
+ was not used by the calibration process to guide the search for model parameter
+s.
+\end_layout
+
+\begin_layout Subsection
+Incorporating school closure interventions
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Incorporating-school-closure"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The next set of experiments contrast runs with and without school closure
+ interventions modeled.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:intrvn-goodEg"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the curves for two countries, ITA and GBR for which incorporation
+ of school interventions (base runs on the left, interventions on the right)
+ improves their fit.
+ The dashed lines in the right-hand figures reflect the beginning and ending
+ dates of the interventions.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/compIntrvn_goodEg.png
+	lyxscale 5
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:intrvn-goodEg"
+
+\end_inset
+
+Interventions improving models
 \end_layout
 
 \end_inset
@@ -530,12 +2155,37 @@ noprefix "false"
 
 \end_inset
 
- shows the range of differences in fit value between these two conditions.
- The model for Taiwan is very poor in both conditions.
- For 14 countries, the difference between the two modesl was small, < 100.
- Of the remaining 20 countries where there was a significant difference
- between models, in 16 cases those incorporating school closures were better
- fits than those without.
+ shows the range of differences in fit value for all countries, from improved
+ fits (left end) to models that had worse fit (right end).
+ Countries where both models (with or without school interventions) had
+ very poor fit scores > 1000 have been highlighted in red.
+ In these cases, both models are considered broken and contrasting them
+ tells us little.
+ For the large majority of countries (n=120), the difference between the
+ two models was small, < 100.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:intrvn-badEG"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ contrasts the results for two other countries, FRA and CAN, for which adding
+ interventions to the model harmed their fit to data.
+ Details of all four runs are included in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:intrvn-examples"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -548,7 +2198,7 @@ status collapsed
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/improvedFit-testSearch-annote.png
+	filename figs/compIntrvn_201216_valDiff.png
 	lyxscale 25
 	width 75page%
 
@@ -581,25 +2231,6 @@ Improved fit
 \end_layout
 
 \begin_layout Standard
-Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Anomolous-countries"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- shows the pairs of models for three other countries of potential interest:
- Romania had an improvement in fit with the incorporation of school closures
- that is just better than 100.
- The Lithuanian model had very good fit without school closures and was
- poorer when this was included.
- Again, no successful models of Taiwan were found in either case.
-\end_layout
-
-\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -609,96 +2240,8 @@ status collapsed
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/otherCountries-sm.png
+	filename figs/compIntrvn_badEg.png
 	lyxscale 5
-	height 80pheight%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Anomolous-countries"
-
-\end_inset
-
-Other countries
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Model calibration
-\end_layout
-
-\begin_layout Subsubsection
-Stochastic repliction
-\end_layout
-
-\begin_layout Standard
-The question of how stochastic factors within Covasim vary the results of
- simulations is an important first question, because no optimizer can do
- well if it is based on noisy results.
-\end_layout
-
-\begin_layout Standard
-A series of n=8 replications of the same simulation were run with the same
- parameters.
- Happily, the range of results across multiple runs shown in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:stochRepl"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-(produced via 
-\noun on
-multisim.??.reduce()
-\noun default
-)
-\end_layout
-
-\end_inset
-
- shows very tight bounds across the mean value.
- (The standard deviation bars around diagnoses is so small has to be barely
- visible.)
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/Austria-reduce.png
-	lyxscale 25
 	width 80page%
 
 \end_inset
@@ -712,11 +2255,11 @@ status open
 \begin_layout Plain Layout
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:stochRepl"
+name "fig:intrvn-badEG"
 
 \end_inset
 
-Stochastic replication
+Interventions harming models
 \end_layout
 
 \end_inset
@@ -730,66 +2273,985 @@ Stochastic replication
 \end_layout
 
 \begin_layout Standard
-Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:stochComp"
-plural "false"
-caps "false"
-noprefix "false"
+\begin_inset Float table
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="7">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+None
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Intervention
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ISO3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+infect
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+beta
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+infect
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+beta
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+CAN
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+49979
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+5.12E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+168
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+49916
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+9.11E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series bold
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+409
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+FRA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+49692
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+5.84E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+581
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+49739
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.04E-2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+853
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+GBR
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+49869
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+6.02E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+525
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+49980
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.30E-2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+274
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ITA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+46062
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+5.66E-3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+632
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+49249
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.72E-2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+232
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
 
 \end_inset
 
- shows the results across all simulation measures 
-\begin_inset Note Note
-status open
+
+\end_layout
 
 \begin_layout Plain Layout
-as produced by multisim.??.compare()
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:intrvn-examples"
+
+\end_inset
+
+With and without interventions modeled - example countries
 \end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Interpretation
+\end_layout
+
+\begin_layout Standard
+The changes related to modeling school interventions (vs.
+ not) described above were based on the simplest alternative regarding testing
+ rates, viz.
+ using the same, fixed test rate (3.3e-4).
+ The same basic pattern is shown across the two variations on the 87 countries
+ where data on testing rates was used instead.
+\end_layout
+
+\begin_layout Standard
+While it is tempting to take positive differences in data like that from
+ ITA and GBR showing that additional modeling effort seems to improve the
+ model, but consideration of the differences in model parameters initInfect
+ and beta makes this seem suspect.
+ The changes in initInfect are all quite small, relative to the upper bound
+ of the allowed calibration search space.
+ The role of initial boundaries for calibration are discussed in Section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Model-calibration"
+plural "false"
+caps "false"
+noprefix "false"
 
 \end_inset
 
 .
- Again, very consistent results across runs are shown in every measure.
+ In all cases beta has increased in the intervention models.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/Austria-comp.png
-	lyxscale 25
-	width 80page%
+That no clear impact of modeling school interventions can be observed is
+ at least somewhat surprising.
+ A key feature of Covasim is its separation of individuals into layers with
+ distinctly intra-layer connection networks.
+ As modeled here, school interventions make significant changes to all four
+ interaction layers (cf.
+ Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:beta-levels"
+plural "false"
+caps "false"
+noprefix "false"
 
 \end_inset
 
-
+), and still don't change much.
 \end_layout
 
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
+\begin_layout Subsection
+Model calibration
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:stochComp"
-
-\end_inset
-
-Comparing stochastic results
-\end_layout
-
-\end_inset
-
-
-\end_layout
+name "subsec:Model-calibration"
 
 \end_inset
 
@@ -801,20 +3263,76 @@ Global optimization
 \end_layout
 
 \begin_layout Standard
-Many modeling efforts now depend on an optimization component that identifies
- best values for key parameters.
- 
-\begin_inset Note Note
+\begin_inset ERT
 status open
 
 \begin_layout Plain Layout
-(cites...)
+
+
+\backslash
+begin{quotation}
 \end_layout
 
 \end_inset
 
- This means that there is no guarantee of finding the actual optimal value
+
+\end_layout
+
+\begin_layout Standard
+Calibration is a complex and dark art and cannot be covered fully here;
+ many books have been written about it and it continues to be an area of
+ active research.
+ A good review article about calibrating agent-based models like Covasim
+ is available here 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1371/journal.pcbi.1007893"
+literal "false"
+
+\end_inset
+
+.
+ Calibration is usually expressed as an optimization problem: specifically,
+ find a vector of parameters 
+\begin_inset Formula $θ$
+\end_inset
+
+ that minimizes the mismatch between the data D and the model 
+\begin_inset Formula $M(θ)$
+\end_inset
+
+.
  
+\begin_inset CommandInset href
+LatexCommand href
+name "Covasim Tutorial#7"
+target "https://github.com/InstituteforDiseaseModeling/covasim/blob/master/docs/tutorials/t7.ipynb"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Computational complexity theory warns there can be no guarantee of finding
+ the actual optimum value 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Papadimitriou15881"
@@ -823,19 +3341,23 @@ literal "false"
 \end_inset
 
 .
+ In the context of modeling, the use of calibration to identify some parameter
+ values generates several new questions: 
 \end_layout
 
-\begin_layout Standard
-All such optimizations generate several new questions: 
+\begin_layout Enumerate
+Since we may have multiple criteria for good solutions, how can we determine
+ the Pareto-optimal combination? For example caring to match both death
+ data and diagnosis data, how do we determine the Pareto optimal combination?
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Enumerate
 How much effort should be put into the search? Ie, how much value is there
  in extending computational effort towards improved results? What sort of
  reward is given for deeper search?
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Enumerate
 Conversely, what makes a solution 
 \begin_inset Quotes eld
 \end_inset
@@ -847,18 +3369,31 @@ good enough
 ?
 \end_layout
 
-\begin_layout Itemize
-Since we may have multiple criteria for good solutions, how can we determine
- the Pareto-optimal combination? For example caring to match both death
- data and diagnosis data, how do we determine the Pareto optimal combination?
+\begin_layout Standard
+For most of the experiments reported here, the answers to these are:
+\end_layout
+
+\begin_layout Enumerate
+A simple weighted sum of of deaths and diagnosis mismatch is used, with
+ deaths counting twice as heavily
+\end_layout
+
+\begin_layout Enumerate
+A constant search effort (population size=32, 25 generations) was allowed
+ the CMAEvolution optimizer
+\end_layout
+
+\begin_layout Enumerate
+There is no early/late termination based on the quality of solutions found
+\end_layout
+
+\begin_layout Standard
+In this section we describe experiments using many more trial and search
+ ranges focused on a single country, AUS.
 \end_layout
 
 \begin_layout Subsubsection
 Search dynamics
-\end_layout
-
-\begin_layout Paragraph
-The value surface
 \end_layout
 
 \begin_layout Standard
@@ -870,10 +3405,11 @@ In the experiments reported here we will generate a sample of 2500 trials
 \end_layout
 
 \begin_layout Standard
-On the left is a plot showing all sample points with darker blues indicating
- better fit values, a red plus sign showing the initial search parameter,
- and a green X showing the labeled best value found.You need to look closely
- but you can see several good value 
+On the left is a plot of the value surface, showing all sample points with
+ darker blues indicating better fit values, a red plus sign showing the
+ initial search parameter, and a green X showing the labeled best value
+ found.
+ Looking closely you can see several good value 
 \begin_inset Quotes eld
 \end_inset
 
@@ -884,7 +3420,7 @@ ridges
  that have been sampled more densely.
  On the right is a more detailed contour plot showing an interpolated surface
  across these samples.
- It shows a highly texturued, multi-modal region near the discovered optimum.
+ It shows a highly textured, multi-modal region near the discovered optimum.
 \end_layout
 
 \begin_layout Standard
@@ -937,38 +3473,15 @@ Value surface
 
 \end_layout
 
-\begin_layout Standard
-The cells highlighted in the table of Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:All-country-statistics"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- correspond to values at or very near bounds imposed on the search, orange
- for values of beta or initial infection near the upper bound, and yell
- for values near their lower bound.
-\end_layout
-
 \begin_layout Paragraph
 Convergence to value optimum
 \end_layout
 
 \begin_layout Standard
-The samples were generated adaptively, towards better solutions across 
-\begin_inset Quotes eld
-\end_inset
-
-populations
-\begin_inset Quotes erd
-\end_inset
-
- of size 100, in a series of 25 "generations." The progression of this search
- process can be tracked according to several key statistics as they vary
- over generations.
+The samples were generated adaptively, towards better solutions across CMA-ES
+ populations of size 100, in a series of 25 generations.
+ The progression of this search process can be tracked according to several
+ key statistics as they vary over generations.
 \end_layout
 
 \begin_layout Standard
@@ -1135,7 +3648,7 @@ noprefix "false"
  As expected, because it is weighted more heavily, matching death data drives
  the search.
  It is interesting to note that improvement with respect to in the two separate
- values (diagneses and death) is well correlated across the generations
+ values (diagnoses and death) is well correlated across the generations
  of the search.
  
 \end_layout
@@ -1300,16 +3813,6 @@ r0 = number of contacts * days infectious * infection probability per contact
  suggests that the second, upper attractor containing the optimum in this
  experiment should be discounted as implausible.
  
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-That's why the primary experiments that are the focus of the results above!
-\end_layout
-
-\end_inset
-
- 
 \end_layout
 
 \begin_layout Standard
@@ -1317,145 +3820,6 @@ There is a clear bifurcation shown in the second contour plot.
  The lower upper bound on initial infection (25000) was selected to force
  search to include only the lower attractor.
  
-\end_layout
-
-\begin_layout Subsection
-Using data for testing rate
-\end_layout
-
-\begin_layout Standard
-Rather than asking the optimization process to select a best testing rate,
- data from OWID can be used instead.
- 
-\end_layout
-
-\begin_layout Standard
-Experiments alternating the two possible sources for testing rates, data
- or search, are summarized in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:testingSearchVData"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
- In all cases, allowing search to establish the parameter value produced
- better fitting models.
- This is to be expected, as a new free parameter has been allowed.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/comp-data:search-intrv-summary.png
-	lyxscale 50
-	height 8in
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:testingSearchVData"
-
-\end_inset
-
-Testing rate via search vs.
- data
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:testingNZ"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- shows contrasting results for the case of New Zealand using search versus
- data for testing rate.
- The optimized value for testing rate shows an enormous number of tests
- performed, relative to available data.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/comp-data:search-intrv-NewZealand.png
-	lyxscale 30
-	width 80page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:testingNZ"
-
-\end_inset
-
-Testing search vs.
- data in New Zealand
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Note that the improvement allowed with testing rate as free parameter is
- despite the error with respect to available data having no consequence
- in Pareto-optimum calculation, since it is given a zero weight.
 \end_layout
 
 \begin_layout Section
@@ -1467,6 +3831,114 @@ Data sources
 \end_layout
 
 \begin_layout Standard
+ECDC used as primary organizing data source.
+ ISO3 codes were used to identify and merge country data.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Two countries missing from ECDC lists, TWN and HNG.
+ 2019 population populations for these two was obtained from 'pop19': 23773876
+ }
+\begin_inset CommandInset href
+LatexCommand href
+name "WorldOMeters"
+target "https://www.worldometers.info/world-population/"
+literal "false"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "ECDC"
+target "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-08-04.xlsx"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "OWID testing"
+target "ttps://github.com/owid/covid-19-data/blob/master/public/data/testing/covid-testing-all-observations.csv"
+literal "false"
+
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "owidcoronavirus"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "UNESCO interventions"
+target "en.unesco.org/sites/default/files/covid_impact_education.csv"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "OxCGRT interventions"
+target "github.com/OxCGRT/covid-policy-tracker/blob/master/data/OxCGRT_latest_responses.csv"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Age distribution data from the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Neher Lab"
+target "https://github.com/neherlab/covid19_scenarios/blob/master/src/assets/data/country_age_distribution.json"
+literal "false"
+
+\end_inset
+
+ as distributed as part of Covasim
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+cf.
+ 
+\family typewriter
+covasim.data.country_age_data.py
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -1476,7 +3948,7 @@ status collapsed
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/dataSources.png
+	filename figs/dataSources-v2.png
 	lyxscale 50
 	height 3in
 
@@ -1508,19 +3980,19 @@ Data sources
 
 \end_layout
 
-\begin_layout Itemize
-OurWorldInData 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "owidcoronavirus"
-literal "false"
-
-\end_inset
-
-
+\begin_layout Standard
+Only countries with populations greater than one million were considered,
+ and the start date for each countries' simulation was picked to begin when
+ data showed the number of infections went above 50.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Subsubsection
+School interventions
+\end_layout
+
+\begin_layout Standard
+Preliminary experiments used a database of interventions developed by a
+ database of international intervention specifics called 
 \begin_inset CommandInset href
 LatexCommand href
 name "Covid-19 Control Strategies List"
@@ -1538,7 +4010,38 @@ literal "false"
 
 \end_inset
 
-] 
+].
+ This data includes a fine-grained analysis of which school levels (kindergarten
+, primary, secondary, university) were ordered closed, and therefore supported
+ fine-grained variations in the age distributions of the sort used effectively
+ by Covasim's population generator.
+ 37 countries were included in this data.
+\end_layout
+
+\begin_layout Standard
+The experiments reported here used instead a 
+\emph on
+consensus
+\emph default
+ database of school closures coming from two distinct data sources, OxCGRT
+ and UNESCO.
+ While broadly consistent, their respective accounts as to just when individual
+ countries were closed nationally was not identical.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:overlapIntervnData"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows two countries' examples: MNG, a country with nearly overlapping accounts;
+ and UZB with more discordant ones.
+ The graphs each show two plots of when school closures were in effect (a
+ value of 1, vs.
+ 0 when not in effect) as described by a source.
 \end_layout
 
 \begin_layout Standard
@@ -1551,9 +4054,115 @@ status collapsed
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/educ_intervene-uniq.png
-	lyxscale 50
-	height 3in
+	filename figs/MNG_ox-unesco_educIntrvn.png
+	lyxscale 25
+	width 40page%
+
+\end_inset
+
+ 
+\begin_inset Graphics
+	filename figs/UZB_ox-unesco_educIntrvn.png
+	lyxscale 25
+	width 40page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:overlapIntervnData"
+
+\end_inset
+
+Overlapping intervention data
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The specification of school closures used in these experiments was conservative:
+ Only intervention periods that were identified by 
+\emph on
+both
+\emph default
+ sources, for periods > 14 days were considered.
+ 136 countries had school interventions that satisfied these criteria.
+\end_layout
+
+\begin_layout Subsubsection
+Testing rate data
+\end_layout
+
+\begin_layout Standard
+Testing data from OurWorldInData 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "owidcoronavirus"
+literal "false"
+
+\end_inset
+
+ was used.
+ For the comparisons in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:dataTR"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, this daily testing data was converted to an average testing rate using
+ the country's population and averaging across the time period of the simulation.
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:countryData"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ summarizes the 136 countries included in this study: their name, ISO-3
+ code, and whether or not they had testing rate data available about them.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/dataOverlapTbl.png
+	lyxscale 25
+	width 80page%
 
 \end_inset
 
@@ -1566,19 +4175,15 @@ status collapsed
 \begin_layout Plain Layout
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:Intervention-dates-and"
+name "fig:countryData"
 
 \end_inset
 
-Intervention dates and educational levels
+Countries' data
 \end_layout
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -1600,152 +4205,533 @@ literal "false"
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Optuna 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "10.1145/3292500.3330701"
-literal "false"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Tree-Structured Parzen Estimator 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "10.1145/3377930.3389817"
-literal "false"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-CMAEvolution 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "hansen2016cma"
-literal "false"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Did not make use of SynthPop
-\end_layout
-
-\begin_layout Subsection
-Key details
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-self.weights = sc.mergedicts({'cum_deaths':10, 'cum_diagnoses':5}, weights)
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-educLevelSize = {'h':4, 'w':20, 'c':20, 'sk': 20, 'sp': 20, 'ss': 40 , 'su':
- 80}
-\end_layout
-
-\begin_layout Itemize
-Only countries with populations > 1e6 were considered.
-\end_layout
-
-\begin_layout Itemize
-Only countries with educational interventions coming after at least one
- week of diagnoses and death data were considered.
- For example, while both Ghana and Mauritius had school closures, but data
- on diagnoses and deaths was not available for a week before the dates of
- their closures.
-\end_layout
-
-\begin_layout Itemize
-Simulation start date picked when number of infections becomes > 50
-\end_layout
-
-\begin_layout Itemize
-Each educational level (kindergarten, primary, secondary, university) was
- treated as a separate 
-\begin_inset Quotes eld
-\end_inset
-
-layer
-\begin_inset Quotes erd
-\end_inset
-
- by Covasim and captured into separate age ranges within the total population.
- This allows interventions at different educational levels to be treated
- independently.
+ is an open-source agent-based (a.k.a.
+ individual-based) model that uses demographic information on age structure
+ and population size to build realistic transmission networks within distinct
+ social layers.
+ It allows age-specific disease outcomes, intrahost viral dynamics, and
+ the ability to incorporate many sorts of interventions affecting these
+ model elements.
  
 \end_layout
 
-\begin_layout Itemize
-Each school closure at any educational level is modeled as a simple on/off:
- school closings start on a specified date, infection rate was set very
- low (
-\family typewriter
-ClosedSchoolBeta = 0.02
-\family default
-) for children in each age group associated with the educational level,
- and are assumed to be in effect until an end-of-closure date.
-\end_layout
+\begin_layout Standard
+The basic model requires specification of two key parameters, the initial
+ number of infected individuals in the population, and 
+\begin_inset Formula $\beta$
+\end_inset
 
-\begin_layout Itemize
-In a small number (6 of 35) of cases, the Covid-19 Control Strategies List
- contained a specific 
-\emph on
-end
-\emph default
- for the school closure; for these countries that date was used to end the
- intervention.
- Otherwise, a default 
-\family typewriter
-SchoolOutDate = 2020-06-01
-\family default
- was used.
-\end_layout
+, the transmission rate from susceptible to infected individuals.
+ The global 
+\begin_inset Formula $\beta$
+\end_inset
 
-\begin_layout Subsubsection
-Age distribution
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-educLevel_ages = {'sk': [4,5], 'sp': [6,10], 'ss': [11,18], 'su': [19,24]}
+ parameter is proposed by the calibration optimizer, then enhanced/attenuated
+ across individual network layers according to parameters based loosely
+ on time-use surveys that track how many hours a week people spend in various
+ settings (work, school, transport, etc), with households getting an additional
+ multiplier for closeness of contact.
+ 
 \end_layout
 
 \begin_layout Standard
-The distinguished age cohorts associated with school levels is shown in
- Figure 
+As data regarding deaths is believed to generally more accurate than that
+ about positive tests, Covasim uses a weighted sum of error with death rates
+ weighted twice as heavily as diagnoses.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
+School closures are modeled as a simple on/off: school closings start/stop
+ on a specified dates, and layer-specific values for 
+\begin_inset Formula $\beta$
+\end_inset
+
+ are again enhanced or attenuated.
+ Following 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jpg20"
+literal "false"
+
+\end_inset
+
+, infection rate was set very low within the schools level, increased within
+ the home level, and lowered significantly in work and community levels.
+ The net values for 
+\begin_inset Formula $\beta$
+\end_inset
+
+ incorporating both basic Covasim values and the result of school interventions
+ are shown in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:beta-levels"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \noindent
 \align center
-\begin_inset Graphics
-	filename figs/Malaysia-people.png
-	lyxscale 5
-	width 80page%
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\beta$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Covasim
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Intervention
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Net with intervention
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Home
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+3.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.29
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+3.87
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+School
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.60
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.02
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.01
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Work
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.60
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.12
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Community
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.30
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.06
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
 
 \end_inset
 
@@ -1758,11 +4744,15 @@ status collapsed
 \begin_layout Plain Layout
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:PopAgeDist"
+name "tab:beta-levels"
 
 \end_inset
 
-Population age distribution
+Per-level 
+\begin_inset Formula $\beta$
+\end_inset
+
+ values
 \end_layout
 
 \end_inset
@@ -1776,25 +4766,38 @@ Population age distribution
 \end_layout
 
 \begin_layout Subsection
-Model calibration
+CMA-ES
 \end_layout
 
 \begin_layout Standard
-An outer-loop of software based on Optuna exists to allow 
+Covariance matrix adaptation evolution strategy (CMA-ES) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hansen2016cma"
+literal "false"
+
+\end_inset
+
+ is a library for stochastic optimization over continuous domains of non-linear,
+ non-convex functions.
+ The 
 \begin_inset Quotes eld
 \end_inset
 
-calibration
+ES
 \begin_inset Quotes erd
 \end_inset
 
- of Covasim models with respect to key parameters.
- It supports both TFE and CMAES optimization techniques.
-\end_layout
+ refers to 
+\begin_inset Quotes eld
+\end_inset
 
-\begin_layout Standard
-Population size is a convenient way to broaden the search so as to reduce
- sampling error.
+Evolutionary strategy,
+\begin_inset Quotes erd
+\end_inset
+
+ a type of evolutionary computation using the metaphors of populations and
+ generations, and distinguished by adaptive rates of mutation across generations.
  The CMA library has a 
 \begin_inset Quotes eld
 \end_inset
@@ -1803,26 +4806,109 @@ tell-ask
 \begin_inset Quotes erd
 \end_inset
 
- interface that allows easy bundling of parallel executions.
+ interface that allows easy bundling of parallel executions of a population
+ alternative values in each generation.
+ The initial range of mutation 
+\begin_inset Formula $\sigma_{0}$
+\end_inset
+
+ was set to 0.1, and the initial search range for all parameters was set
+ to one quarter of the range between their upper and lower bounds.
 \end_layout
 
 \begin_layout Standard
-We optimize over two parameters, 
+CMA-ES was used as the 
+\begin_inset Quotes eld
+\end_inset
+
+calibration
+\begin_inset Quotes erd
+\end_inset
+
+ outer-loop around the basic Covasim simulation to search for key parameter
+ values that allow the model to best 
+\begin_inset Quotes eld
+\end_inset
+
+fit
+\begin_inset Quotes erd
+\end_inset
+
+ against data.
+ Preliminary experiments across a large number of trials on a single country
+ (cf.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Model-calibration"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) identified 25 generations of 32 individuals each as being reasonable;
+ i.e., 800 trials total were allocated to find the search for parameter values
+ causing the model to best fit the data.
+ Optimization is always over two parameters, 
 \begin_inset Formula $\beta$
 \end_inset
 
- and the number of initial infections, and in some cases a third, the assumed
- testing rate.
- 
+ and 
+\noun on
+initInfect
+\noun default
+, the number of initial infections.
+ Based on the experiments reported in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Model-calibration"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, initial search bounds for the optimization were set:
+\end_layout
+
+\begin_layout Itemize
+initial infected: best = 21000, lower bound =16000, upper bound=26000
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\beta$
+\end_inset
+
+: best = .005, lower bound = 0.001, upper bound=0.01
 \end_layout
 
 \begin_layout Standard
-NTrial=100 trials were allocated to find the search for parameter values
- causing the model to best fit the data.
+In the experiments described in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:searchDataTR"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, a third parameter corresponding to testing rate is also included.
+ Bounds on its search were established using the data for the 87 countries
+ available:
+\end_layout
+
+\begin_layout Itemize
+testingRate: best=3.3e-4, lower bound = 2e-6, upper bound=3e-3
 \end_layout
 
 \begin_layout Section
 Next steps
+\end_layout
+
+\begin_layout Itemize
+Use TPE (Tree-structured Parzen Estimator) optimization ala Optuna
 \end_layout
 
 \begin_layout Subsection
@@ -1908,43 +4994,168 @@ Conclusions
 \end_layout
 
 \begin_layout Subsection
+Lessons learned
+\end_layout
+
+\begin_layout Itemize
+Be careful with standardization of country naming and data:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Note excluded countries from the ECDC lists: TWN and HNG
+\end_layout
+
+\begin_layout Itemize
+cf 
+\family typewriter
+covasim.
+ normalizeCVAgeData()
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Select which parameters you choose to calibrate, and their initial bounds,
+ carefully.
+\end_layout
+
+\begin_layout Itemize
+Differences in Covasim value/fit < 100 are not significant; larger differences
+ may not be either.
+\end_layout
+
+\begin_layout Subsection
 Honest priors
 \end_layout
 
-\begin_layout Itemize
-Bounds; bounded optimization
+\begin_layout Standard
+Efforts towards placing models like the ones considered here on firm statistical
+ foundations require better answers to a number of questions:
 \end_layout
 
 \begin_layout Itemize
-testing rates
+How do the bounds established on global optimization, and artifacts of the
+ global search process, impact our understanding of the priors they impose
+ on nodel results?
 \end_layout
 
 \begin_layout Itemize
-What accuracy can we claim for model parameter estimation?
+How best to capture the sensitivity of our results given uncertainty in
+ testing rates?
+\end_layout
+
+\begin_layout Itemize
+What accuracy can we claim for model parameter estimation? 
+\end_layout
+
+\begin_layout Standard
+Promising approaches include Approximate Bayesian Computation (ABC) and
+ history matching 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "mckinley2018"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
 Scientific sharing, publishing and open source models
 \end_layout
 
-\begin_layout Itemize
-The expressive power of agent-based models allows evaluation of many interventio
-n strategies 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{quotation}
 \end_layout
 
-\begin_layout Itemize
-Open source modeling systems like Covasim allow independent model components
- to be investigated and incorporated separately 
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-The publishing of full model implementation, like that included with the
- [Panovska-Griffiths] publication is an excellent example 
+\begin_layout Standard
+Early models relied on sparse, sometimes unreliable, data, and modelers
+ did not anticipate the emergence of important new facts....
+ For use in an emergency, models developed through basic research need to
+ be “operationalized”—that is, made robust for evaluating specific policy
+ interventions.
+ “Nowcasting” requires models that integrate incomplete, real-time data
+ and emerging medical knowledge to provide situational awareness....
+ Models must also incorporate behavioral responses to policy interventions
+ that may change the course of an epidemic.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Press1015"
+literal "false"
+
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-Fast-paced scientific sharing like that demanded by COVID-19 is catalyzed
- by such interactions
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{quotation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Traditional compartmental models represent the core of epidemiological predictio
+n efforts, but become constrained as more fine-grained compartments are
+ considered.
+ Models like Covasim bring the expressive power of agent-based desciptions
+ of behaviors over networks to allow evaluation of many varieties of interventio
+n strategies and empirical testing against many data sources, but are more
+ difficult to make statistical inferences about.
+ 
+\end_layout
+
+\begin_layout Standard
+The well-engineered, open source Covasim codebase allows independent model
+ components to be investigated and incorporated separately.
+ Basic agent-based models can be related directly to compartment model analogs.
+ Careful experimentation building from these may be able to extend the results
+ into mathematically intractable regimes.
+ The publishing of full model implementation details, like that included
+ with the Panovska-Griffiths publication
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jpg20"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "code repository"
+target "https://github.com/Jasminapg/Covid-19-Analysis"
+literal "false"
+
+\end_inset
+
+ is an excellent example.
+ The COVID-19 pandemic, and others to come, demand fast-paced scientific
+ sharing that is catalyzed by such interactions.
 \end_layout
 
 \begin_layout Standard
