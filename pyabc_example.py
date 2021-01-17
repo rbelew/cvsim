@@ -14,17 +14,23 @@ default_pars = dict(
     verbose = 0,
 )
 
+runs = {}
 
 def model(parameters):
-    print('*', end=None)
+    now = str(sc.now())
+    runs[now] = len(runs)
     pars = sc.dcp(default_pars)
     pars.update(parameters)
     sim = cv.Sim(pars=pars, datafile='example_data.csv', interventions=cv.test_num(daily_tests='data'))
     sim.run()
     fit = sim.compute_fit()
+    print(f'{now} ({len(runs)}): {parameters} = {fit.mismatch}')
     return {"mismatch": fit.mismatch}
 
-prior = pyabc.Distribution(rel_death_prob=pyabc.RV("uniform", 0, 3))
+prior = pyabc.Distribution(
+    beta=pyabc.RV("uniform", 0.005, 0.020),
+    rel_death_prob=pyabc.RV("uniform", 0, 3),
+    )
 
 
 def distance(x, y):
@@ -38,7 +44,7 @@ abc.new(db_path, {"mismatch": observation})
 
 
 #%% Run
-history = abc.run(minimum_epsilon=.1, max_nr_populations=10)
+history = abc.run(minimum_epsilon=.1, max_nr_populations=5)
 
 
 #%% Plotting
@@ -50,17 +56,13 @@ for t in range(history.max_t+1):
         xmin=0, xmax=3,
         x="rel_death_prob", ax=ax,
         label="PDF t={}".format(t))
-ax.axvline(observation, color="k", linestyle="dashed");
 ax.legend()
 
 _, arr_ax = plt.subplots(2, 2)
 
 pyabc.visualization.plot_sample_numbers(history, ax=arr_ax[0][0])
 pyabc.visualization.plot_epsilons(history, ax=arr_ax[0][1])
-pyabc.visualization.plot_credible_intervals(
-    history, levels=[0.95, 0.9, 0.5], ts=[0, 1, 2, 3, 4],
-    show_mean=True, show_kde_max_1d=True,
-    refval={'rel_death_prob': 2.0}, arr_ax=arr_ax[1][0])
+pyabc.visualization.plot_credible_intervals(history, arr_ax=arr_ax[1][0])
 pyabc.visualization.plot_effective_sample_sizes(history, ax=arr_ax[1][1])
 
 plt.gcf().set_size_inches((12, 8))
