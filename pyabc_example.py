@@ -67,3 +67,4 @@ pyabc.visualization.plot_effective_sample_sizes(history, ax=arr_ax[1][1])
 
 plt.gcf().set_size_inches((12, 8))
 plt.gcf().tight_layout()
+plt.show()
