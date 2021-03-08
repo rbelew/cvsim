@@ -28,7 +28,7 @@
 \SectionNumbersOn
 
 \pagestyle{myheadings}
-\markboth{Generalized models of 136 countries - Draft 25 Dec 20}{Generalized models of 136 countries - Draft 25 Dec 20}
+\markboth{Generalized models of 78 countries - Draft 8 Mar 20}{Generalized models of 78 countries - Draft 8 Mar 21}
 
 % \DeclareBibliographyCategory{cited}
 % \AtEveryCitekey{\addtocategory{cited}{\thefield{entrykey}}}
@@ -124,7 +124,7 @@ customHeadersFooters
 \begin_body
 
 \begin_layout Title
-Generalized modeling of interventions across 136 countries
+Generalized modeling of interventions across 78 countries
 \end_layout
 
 \begin_layout Standard
@@ -132,7 +132,7 @@ Generalized modeling of interventions across 136 countries
 \align center
 
 \emph on
-Draft: 25 December 2020
+Draft: 8 Mar 2021
 \end_layout
 
 \begin_layout Abstract
@@ -158,71 +158,72 @@ literal "false"
 \end_inset
 
 .
- We extend this methodology to consider data from 136 countries for which
- intervention data is available to retrospectively model interventions employed
+ We extend this methodology to consider data from 78 countries for which
+ both intervention data and data concerning testing rates is available to
+ retrospectively model interventions employed in the first months of 2020
  in these countries.
  Because the age distribution of populations is a key feature of the COVID-19
  pandemic and contacts among young people are often age-stratified and may
  play an especially important role, we focus here on school closure intervention
 s.
- For 87 of the countries evaluated there is also data concerning testing
- rates in each country that can be compared to other estimates.
-\end_layout
-
-\begin_layout Abstract
-A Covasim model was calibrated for each of 136 countries, with each country's
- population, age distribution, disease emergence and school closing dates
- specified, then calibrated against data concerning COVID-19 diagnosed cases
- and related deaths.
- All countries' simulations were run with and without school interventions.
- The hypothesis considered is: Does incorporating the additional knowledge
- of school interventions into a model makes it a better predictor of data
- concerning diagnoses and deaths?
-\end_layout
-
-\begin_layout Abstract
-Because assumptions regarding background testing rates being performed are
- critical for interpretation of statistics regarding the number of diagnosed
- patients, three conditions were considered: assume the same 
-\emph on
-fixed
-\emph default
- testing rated for all countries; 
-\emph on
-searching
-\emph default
- for an estimated testing rate as part of model calibration; and use 
-\emph on
-data
-\emph default
- for the 87 countries that have this data available.
  
 \end_layout
 
 \begin_layout Abstract
-An analysis of the global optimization used to calibrate these models to
- parameters is considered in detail.
- General lessons for using and interpreting automatic parameter calibration
- methods are suggested.
- The main difficulty, of course, is in establishing what makes one model
- a 
+A Covasim model was built for each country, with its population, age distributio
+n, disease emergence and school closing dates specified.
+ The model was then calibrated against data concerning COVID-19 diagnosed
+ cases and related deaths.
+ All countries' simulations were run with and without school interventions.
+ Because assumptions regarding background testing rates being performed
+ are critical to statistics regarding the number of diagnosed patients,
+ three conditions were considered: the same 
 \emph on
-significantly
+fixed
 \emph default
- better predictor.
- For now at least we can 
+ testing rated was assumed for all countries; 
+\emph on
+searching
+\emph default
+ for an estimated testing rate as part of model calibration; the actual
+ 
+\emph on
+data
+\emph default
+ available.
+ The goal of this 
+\emph on
+post hoc
+\emph default
+ analysis of historical data is to understand the limits of our modeling
+ tools as we move forward to use them for predictive tasks.
+ We consider the hypothesis: Does incorporating the additional knowledge
+ of school interventions into a model makes it a better predictor of data
+ concerning diagnoses and deaths? 
+\end_layout
+
+\begin_layout Abstract
+The calibration of model parameters plays an important role in their evaluation,
+ and an analysis of methods used to calibrate models is considered in detail.
+ First, experiments using global optimization methods are used to search
+ for model parameters that allowed a model to best fit available data.
+ Second, Approximate Bayesian Computation (ABC) techniques were used to
+ find model parameters with maximal posterior probability according to kernal
+ density estimates.
+ ABC methods allow estimation of our confidence in the calibrated models'
+ parameters, and they suggest we can 
 \emph on
 not
 \emph default
- reject the null hypothesis: As a general rule, adding school interventions
- can not be shown to improve the model.
+ reject the null hypothesis:  adding school interventions can not be shown
+ to improve the model.
 \end_layout
 
 \begin_layout Section
 Introduction
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 COVID-19 continues to spread around the world and modeling plays an important
  role in informing policy 
 \begin_inset CommandInset citation
@@ -363,21 +364,263 @@ end{quotation}
 \end_layout
 
 \begin_layout Standard
-With travel restrictions as they were in the spring and summer of 2020,
- levels of migration across national borders were considerably smaller than
- that across state or provincial boundaries.
- Given the data currently available, only models at the level of individual
- countries and interventions ordered nationally are considered here.
+Covasim is a stochastic agent-based simulator for performing COVID-19 analyses.
+ It depends on two primary parameters, 
+\noun on
+initInfect
+\noun default
+, the number of people initially infected at the start of the contagion,
+ and a baseline value for 
+\begin_inset Formula $\beta$
+\end_inset
+
+, the transmission rate from susceptible to infected individuals.
+ A key feature of Covasim is its modeling of interaction network 
+\begin_inset Quotes eld
+\end_inset
+
+layers
+\begin_inset Quotes erd
+\end_inset
+
+ distinguishing various settings (work, school, transport, households, communiti
+es) which modulate 
+\begin_inset Formula $\beta$
+\end_inset
+
+ differently in these settings.
  
 \end_layout
 
 \begin_layout Standard
-Because the age distribution of populations is a key feature of the COVID-19
+With travel restrictions as they were in the spring and summer of 2020,
+ levels of migration across national borders were considerably smaller than
+ that across state or provincial boundaries.
+ Given the data available, only models at the level of individual countries
+ and interventions ordered 
+\emph on
+nationally
+\emph default
+ are considered here.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The absence of a national school closure policy in the United States is
+ the reason it is not included in this analysis.
+\end_layout
+
+\end_inset
+
+ Because the age distribution of populations is a key feature of the COVID-19
  pandemic and contacts among young people are often age-stratified and may
  play an especially important role, we focus here on school closure intervention
 s.
- Because global optimization of simulation parameters is a common aspect
- of many modeling efforts 
+ 
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:countrySumm"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ lists the 78 countries included in this study with their ISO-3 code and
+ name, together with key statistics:
+\end_layout
+
+\begin_layout Itemize
+population in 2019, from ECDC 
+\end_layout
+
+\begin_layout Itemize
+the start date for their simulation (when the number of infection first
+ went > 50)
+\end_layout
+
+\begin_layout Itemize
+number of days with data regarding testing
+\end_layout
+
+\begin_layout Itemize
+number of days closed by school interventions, together with the starting
+ and ending dates
+\end_layout
+
+\begin_layout Standard
+Note that the countries modeled varied in population from just over a million
+ (EST) to IND with a population of 1.4 billion.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/countrySummTbl.png
+	lyxscale 25
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:countrySumm"
+
+\end_inset
+
+Country summary statistics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To give a preview of the experiments to be presented, consider the comparison
+ of two runs presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:comp-noSchool-HUN"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ This shows six curves summarizing two simulation run for the country of
+ Hungary (ISO3 code HUN).
+ The two curves in the top left graph show the simulation's estimate (solid
+ line) and data (boxes) of cummulative diagnoses during early 2020, the
+ middle graph shows estimated vs.
+ data on cummulative deaths, and the lowest graph shows the cummulative
+ number of tests performed.
+ These same curves are repeated for two different experimental conditions,
+ in this case simulations with and without school interventions included
+ in the model.
+ Better models are those whose simulated estimates for diagnoses and deaths
+ have the best match with available data (cf.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Covasim"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:dataTR"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ contrasts models using different bases for testing, and Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Incorporating-school-closure"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ contrasts models with and without school closure interventions in the model.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/vdeep_noVSchool_210307-HUN.png
+	lyxscale 25
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:comp-noSchool-HUN"
+
+\end_inset
+
+Model predictions for HUN, without and with intervention
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On their face, because the right simulation's estimates of deaths is a closer
+ match to data, these results make it seem as if incorporating school closures
+ in the model is an improvement.
+ This would make us believe that modeling interventions is worthwhile, and
+ that the model parameter values (
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\noun on
+initInfect
+\noun default
+) associated with this model should be considered more accurate.
+ But is the difference between the two models 
+\emph on
+statistically significant
+\emph default
+? Typically, global optimization of simulation parameters is performed to
+ find values which minimize model mismatch 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "10.1371/journal.pcbi.1007893"
@@ -385,14 +628,45 @@ literal "false"
 
 \end_inset
 
-, we evaluate the optimization process implemented using the CMA-ES process
- in some detail.
+.
+ In Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appen-CMA-ES-search"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we describe the optimization of Covasim parameters using Covariance matrix
+ adaptation evolution strategy (CMA-ES).
+ In Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:calibration"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ these results are also put in the probabilistically more sound context
+ of Approximate Bayesian Computation (ABC).
+ 
+\end_layout
+
+\begin_layout Standard
+As the database supporting infections, deaths and school interventions during
+ the first months of 2020 recedes into the past, it becomes increasingly
+ irrelevant to the pandemic situation now.
  The goal of this 
 \emph on
 post hoc
 \emph default
- analysis of historical data is to understand the limits of our modeling
- tools as we move forward to use them for predictive tasks.
+ analysis over the broad set of historical data across many countries is
+ to understand the limits of our modeling tools as we move forward to use
+ them for analysis of newer data and predictive purposes.
 \end_layout
 
 \begin_layout Section
@@ -412,13 +686,16 @@ base model
 \emph on
 not
 \emph default
- include school intervention and which use a 
+ include school intervention, which use 
 \emph on
-fixed
+data
 \emph default
- testing rate (=3.3e-4, the average across all countries with testing data;
- cf.
- Section 
+ for the testing rate, and which has been calibrated using ABC methods.
+ Experiments contrasting these models with ones 
+\emph on
+searching
+\emph default
+ for the testing rate are then presented in are in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:dataTR"
@@ -428,21 +705,7 @@ noprefix "false"
 
 \end_inset
 
-).
- Experiments contrasting models searching for the testing rate, and ones
- using data for testing rate are in Section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "subsec:dataTR"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
- Experiments contrasting the base model against simulations including school
- interventions are considered in Section 
+, ones including school interventions in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Incorporating-school-closure"
@@ -452,12 +715,44 @@ noprefix "false"
 
 \end_inset
 
+, and ones calibrated using CMA-ES global optization in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appen-CMA-ES-search"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ An analysis of the statistical significance of these differences is considered
+ in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:calibration"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
 .
- 
 \end_layout
 
 \begin_layout Subsection
 Base model
+\end_layout
+
+\begin_layout Itemize
+use of ABC on noSchool, trate=data as base case
+\end_layout
+
+\begin_layout Itemize
+Example country
+\end_layout
+
+\begin_layout Itemize
+contrasted with trate=srch, school, CMAES
 \end_layout
 
 \begin_layout Standard
@@ -474,31 +769,24 @@ noprefix "false"
 
 \end_inset
 
- shows the range of resulting model fits across all 136 countries, with
- lower fitness scores assigned to simulations with a better match of predictions
+ shows the range of resulting model fits across 78 countries, with lower
+ fitness scores assigned to simulations with a better match of predictions
  for the number of diagnoses and deaths.
- There is not any absolute criterion as to what makes for a 
-\begin_inset Quotes eld
-\end_inset
-
-good
-\begin_inset Quotes erd
-\end_inset
-
- fit, but 130 countries have fit values less than 500.
+ Most countries have fit values below 150, and the average fit across countries
+ is 91.6, including the poor fit examples of UGA and SGP.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/base-modelFit.png
+	filename figs/vdeep-allModelsFit.png
 	lyxscale 20
 	width 80page%
 
@@ -541,51 +829,12 @@ noprefix "false"
 
 \end_inset
 
- shows the result of the simulation for two countries, COL and LAO.
+ shows the result of two simulation for COL and SGP; COL fit is the best,
+ and SGP is one of the worst.
  For each country, the top two plots capture model behavior relative to
  data for the number of diagnoses across the time interval considered.
- The bottom plot simply shows the number of tests that would have been given
- over time, assuming the fixed testing rate and country's population; it
- isn't useful in this basic model but will provide contrast in Sections
- 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "subsec:dataTR"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
- COL and LAO were selected as being a particularly good 
-\begin_inset Quotes eld
-\end_inset
-
-fit
-\begin_inset Quotes erd
-\end_inset
-
- with the data (COL), and particularly bad (LAO).
- Note that this should be considered the 
-\begin_inset Quotes eld
-\end_inset
-
-best fit found
-\begin_inset Quotes erd
-\end_inset
-
- with respect to the calibration optimization over the two free parameters,
- 
-\begin_inset Formula $\beta$
-\end_inset
-
- and 
-\noun on
-initInfect
-\noun default
-, the number of initial infections, and using sum-squared-error as the measure
- of mismatch.
+ The bottom plot shows the number of tests that would have been given over
+ time.
  
 \end_layout
 
@@ -593,23 +842,15 @@ initInfect
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/base-COL-fit.png
+	filename figs/vdeep-minMaxFit.png
 	lyxscale 10
-	width 40page%
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename figs/base-LAO-fit.png
-	lyxscale 10
-	width 40page%
+	width 80page%
 
 \end_inset
 
@@ -626,7 +867,99 @@ name "fig:base-examples"
 
 \end_inset
 
-Base model: COL and LAO
+Base model: COL and SGP
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:base-keyParam"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the values of the key 
+\noun on
+initInfect
+\noun default
+ and 
+\begin_inset Formula $\beta$
+\end_inset
+
+ parameters for all countries.
+ Best KDE estimates for 
+\noun on
+initInfect
+\noun default
+ vary by three orders of magnitude, and those for 
+\begin_inset Formula $\beta$
+\end_inset
+
+ vary by a factor of three.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+KDE 
+\noun on
+initInfect
+\noun default
+: SGN=1137; TUR=45026.
+ KDE 
+\begin_inset Formula $\beta$
+\end_inset
+
+: PSE=0.0016; GHA=0.0059 
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/vdeep-keyParam.png
+	lyxscale 10
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:base-keyParam"
+
+\end_inset
+
+Base model key parameter distribution
 \end_layout
 
 \end_inset
@@ -651,105 +984,23 @@ name "subsec:dataTR"
 \end_layout
 
 \begin_layout Standard
-For 87 countries there exists data on testing rates via OWID.
- Experiments using this source for testing rates can be compared to using
- a fixed testing rate, and to rates found via calibration.
-\end_layout
-
-\begin_layout Subsubsection
-Comparing data against fixed testing rate
-\end_layout
-
-\begin_layout Standard
-Using data-based testing rates vs.
- the fixed rate is as likely to improve as harm the model.
- As shown in Figure 
+A central issue in epidemiological modeling concerns assumptions regarding
+ the background testing rates on which diagnoses counts are based.
+ Experiments over countries with data on testing rates (daily testing counts
+ as a fraction of the country's population) via OWID were contrasted with
+ average testing rates found via calibration.
+ Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:fixData-trRatioVfit"
+reference "fig:dataVsearchTrate"
 plural "false"
 caps "false"
 noprefix "false"
 
 \end_inset
 
-, while there seems a general trend towards increased testing rates improving
- fit, the correlation is not strong (
-\begin_inset Formula $r^{2}=0.37$
-\end_inset
-
-).
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/compData_201203_fitVtrRatio.png
-	lyxscale 30
-	width 80page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:fixData-trRatioVfit"
-
-\end_inset
-
-Model fit related to data vs.
- fixed testing rate
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Comparing data against calibrated testing rate
-\end_layout
-
-\begin_layout Standard
-Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:searchDataTR"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- shows the log ratio 
-\begin_inset Formula $log(\frac{testRate_{data}}{testRate_{search}})$
-\end_inset
-
- of the testing rate from data vs.
- search for all countries.
- In most cases the testing rate identified via search is lower, and sometimes
- much lower, than that provided in data; i.e., most countries are below the
- line showing the ratio=1.0.
- 
+ contrasts the testing rate found via calibration search vs.
+ the data-based rate
 \end_layout
 
 \begin_layout Standard
@@ -762,7 +1013,7 @@ status open
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/searchData_201221_trRatio.png
+	filename figs/compdataSearch2_210227.png
 	lyxscale 30
 	width 80page%
 
@@ -777,12 +1028,12 @@ status open
 \begin_layout Plain Layout
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:searchDataTR"
+name "fig:dataVsearchTrate"
 
 \end_inset
 
-Search vs.
- data for testing rate - all countries
+Testing rate from data vs.
+ via search
 \end_layout
 
 \end_inset
@@ -796,1279 +1047,41 @@ Search vs.
 \end_layout
 
 \begin_layout Standard
-Three countries, BGR,CHE and NGA, sampled from across the range of results,
- have been highlighted.
- Comparisons of model results for these countries is shown in Figure 
+The testing rates identified via calibration were generally much larger
+ (20x) than the data-based values.
+ Two countries, ARE and BHR, had much higher testing rates reported in the
+ data than the others, with little difference reflected by their calibrated
+ values.
+ None of the models' fit changed appreciably (+/-200) using one or the other
+ source of testing rate.
+ As a baseline, these results were also compared to ones using the same,
+ constant testing rate (as a fraction of the population tested per day)
+ of 
+\noun on
+testing_rate
+\noun default
+=3.3e-4, the average across all countries with data (shown as a red line
+ in Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:searchData-examples"
+reference "fig:dataVsearchTrate"
 plural "false"
 caps "false"
 noprefix "false"
 
-\end_inset
-
-, and details are provided in Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:Search-vs.-data"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
- Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:searchData-BGR-comp"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- shows how 
-\emph on
-daily
-\emph default
- testing data compares to the constant (average) testing 
-\emph on
-rate
-\emph default
- identified via search for BGR; note that BGR has a data/search testing
- rate ratio near 1.0.
- Nevertheless search's slightly higher testing rate allows an improved value
- due to a better match with diagnosis data.
- In the CHE models, using data for testing rates improved the fit considerably
- (although barely noticeable in the plotted curves).
- With NGA, on the other hand, using a much larger testing rate than in the
- data finds only a slightly better model fit.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/searchData_201221_examples.png
-	lyxscale 10
-	width 80page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:searchData-examples"
-
-\end_inset
-
-Search vs.
- data testing rates for BGR, CHE and NGA
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float table
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="10">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<row>
-<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-Search
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-Data
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-ISO3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-trRatio
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-infect
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-beta
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-testrate
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-value
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-infect
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-beta
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-testrate
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-value
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-BGR
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-1.07E+0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-1418
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-5.34E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-2.42E-4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-231
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-1539
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-5.13E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-2.59E-4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\series bold
-131
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-CHE
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-3.85E+0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-42012
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-3.70E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-1.12E-4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-576
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-34946
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-4.00E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-4.33E-4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-62
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-NGA
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-2.74E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-32249
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-4.62E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-2.59E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-193
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-9740
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-4.81E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-7.10E-6
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-225
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:Search-vs.-data"
-
-\end_inset
-
-Search vs.
- data for testing rate - example countries
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/BGR_testRate-searchData.png
-	lyxscale 30
-	width 80page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:searchData-BGR-comp"
-
-\end_inset
-
-Testing rate from search vs.
- data for BGR
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Overall, using data-based testing rates with a model improved their fit
- somewhat, in comparison to the value found via calibration search; average
- improvement ~ 100
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-Note that 
-\begin_inset Quotes eld
-\end_inset
-
-improvement
-\begin_inset Quotes erd
-\end_inset
-
- by data-based models is reflected in negative differences in value, since
- smaller values reflect better models.
-\end_layout
-
-\end_inset
-
-.
- As shown in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:searchData-trRatioVfit"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-, while there seems a general trend towards increased testing rates improving
- fit, the correlation is not strong (
-\begin_inset Formula $r^{2}=0.34$
 \end_inset
 
 ).
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/searchData_201221_trVfit.png
-	lyxscale 30
-	width 80page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:searchData-trRatioVfit"
-
-\end_inset
-
-Model fit related to data/search testing rate
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
+ Again, simulations using this value for testing rate did not appreciably
+ change model fit from ones using data-based values.
 \end_layout
 
 \begin_layout Standard
 Note that the difference between predicted testing rate and data regarding
- was not used by the calibration process to guide the search for model parameter
-s.
+ this value was not used by the calibration process in these experiments
+ to guide the search for model parameters, although Covasim's Fit measure
+ could be modified to do so.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -2084,8 +1097,73 @@ name "subsec:Incorporating-school-closure"
 
 \begin_layout Standard
 The next set of experiments contrast runs with and without school closure
- interventions modeled.
- Figure 
+ interventions included in the model.
+ As shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:intrvnFitDiff"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, most models' fits were not changed much by including school intervention.
+ Since fit is measured using a scale where smaller values mean better fit,
+ negative differences indicate models which were improved with interventions
+ modeled, and positive differences indicate poorer fit when interventions
+ are included.
+ When model fit changed, the model 
+\emph on
+without
+\emph default
+ school intervention modeled was typically superior.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/vdeep_noVSchool_210307-fitDiff.png
+	lyxscale 30
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:intrvnFitDiff"
+
+\end_inset
+
+Change in fitness with intervention
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:intrvn-goodEg"
@@ -2095,9 +1173,18 @@ noprefix "false"
 
 \end_inset
 
- shows the curves for two countries, ITA and GBR for which incorporation
- of school interventions (base runs on the left, interventions on the right)
- improves their fit.
+ shows the curves for two countries, HUN (highlighted green in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:intrvnFitDiff"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) and ITA (red) for which incorporation of school interventions decreased
+ (i.e., improved) or increased (harmed) their fit most.
  The dashed lines in the right-hand figures reflect the beginning and ending
  dates of the interventions.
 \end_layout
@@ -2106,13 +1193,13 @@ noprefix "false"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/compIntrvn_goodEg.png
+	filename figs/vdeep_noVSchool_210307-HUN+ITA.png
 	lyxscale 5
 	width 80page%
 
@@ -2131,7 +1218,7 @@ name "fig:intrvn-goodEg"
 
 \end_inset
 
-Interventions improving models
+Intervention changes for HUN and ITA
 \end_layout
 
 \end_inset
@@ -2142,1124 +1229,17 @@ Interventions improving models
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Improved-fit"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- shows the range of differences in fit value for all countries, from improved
- fits (left end) to models that had worse fit (right end).
- Countries where both models (with or without school interventions) had
- very poor fit scores > 1000 have been highlighted in red.
- In these cases, both models are considered broken and contrasting them
- tells us little.
- For the large majority of countries (n=120), the difference between the
- two models was small, < 100.
- Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:intrvn-badEG"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- contrasts the results for two other countries, FRA and CAN, for which adding
- interventions to the model harmed their fit to data.
- Details of all four runs are included in Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:intrvn-examples"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/compIntrvn_201216_valDiff.png
-	lyxscale 25
-	width 75page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Improved-fit"
-
-\end_inset
-
-Improved fit
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/compIntrvn_badEg.png
-	lyxscale 5
-	width 80page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:intrvn-badEG"
-
-\end_inset
-
-Interventions harming models
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float table
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="7">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<row>
-<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-None
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-Intervention
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-ISO3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-infect
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-beta
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-value
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-infect
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-beta
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-value
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-CAN
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-49979
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-5.12E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-168
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-49916
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-9.11E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series bold
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-409
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-FRA
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-49692
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-5.84E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-581
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-49739
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-1.04E-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-853
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-GBR
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-49869
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-6.02E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-525
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-49980
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-1.30E-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-274
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-ITA
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-46062
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-5.66E-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-632
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-49249
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-1.72E-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-232
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:intrvn-examples"
-
-\end_inset
-
-With and without interventions modeled - example countries
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Interpretation
-\end_layout
-
-\begin_layout Standard
-The changes related to modeling school interventions (vs.
- not) described above were based on the simplest alternative regarding testing
- rates, viz.
- using the same, fixed test rate (3.3e-4).
- The same basic pattern is shown across the two variations on the 87 countries
- where data on testing rates was used instead.
-\end_layout
-
-\begin_layout Standard
-While it is tempting to take positive differences in data like that from
- ITA and GBR showing that additional modeling effort seems to improve the
- model, but consideration of the differences in model parameters initInfect
- and beta makes this seem suspect.
- The changes in initInfect are all quite small, relative to the upper bound
- of the allowed calibration search space.
- The role of initial boundaries for calibration are discussed in Section
- 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "subsec:Model-calibration"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
- In all cases beta has increased in the intervention models.
-\end_layout
-
-\begin_layout Standard
-That no clear impact of modeling school interventions can be observed is
- at least somewhat surprising.
- A key feature of Covasim is its separation of individuals into layers with
- distinctly intra-layer connection networks.
- As modeled here, school interventions make significant changes to all four
- interaction layers (cf.
- Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:beta-levels"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-), and still don't change much.
 \end_layout
 
 \begin_layout Subsection
-Model calibration
+Model calibration using ABC and CMA-ES
 \begin_inset CommandInset label
 LatexCommand label
-name "subsec:Model-calibration"
+name "subsec:calibration"
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Subsubsection
-Global optimization
 \end_layout
 
 \begin_layout Standard
@@ -3331,8 +1311,25 @@ end{quotation}
 \end_layout
 
 \begin_layout Standard
-Computational complexity theory warns there can be no guarantee of finding
- the actual optimum value 
+Computational complexity theory 
+\begin_inset Quotes eld
+\end_inset
+
+...help[s] us comprehend why so many practical problems seem to be resistant
+ to efficient solution by computer
+\begin_inset Quotes erd
+\end_inset
+
+ and warns that for 
+\begin_inset Quotes eld
+\end_inset
+
+total search
+\begin_inset Quotes erd
+\end_inset
+
+ problems such as this, there can be no guarantee of finding the actual
+ optimum value 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Papadimitriou15881"
@@ -3341,154 +1338,18 @@ literal "false"
 \end_inset
 
 .
- In the context of modeling, the use of calibration to identify some parameter
- values generates several new questions: 
-\end_layout
-
-\begin_layout Enumerate
-Since we may have multiple criteria for good solutions, how can we determine
- the Pareto-optimal combination? For example caring to match both death
- data and diagnosis data, how do we determine the Pareto optimal combination?
-\end_layout
-
-\begin_layout Enumerate
-How much effort should be put into the search? Ie, how much value is there
- in extending computational effort towards improved results? What sort of
- reward is given for deeper search?
-\end_layout
-
-\begin_layout Enumerate
-Conversely, what makes a solution 
-\begin_inset Quotes eld
-\end_inset
-
-good enough
-\begin_inset Quotes erd
-\end_inset
-
-?
-\end_layout
-
-\begin_layout Standard
-For most of the experiments reported here, the answers to these are:
-\end_layout
-
-\begin_layout Enumerate
-A simple weighted sum of of deaths and diagnosis mismatch is used, with
- deaths counting twice as heavily
-\end_layout
-
-\begin_layout Enumerate
-A constant search effort (population size=32, 25 generations) was allowed
- the CMAEvolution optimizer
-\end_layout
-
-\begin_layout Enumerate
-There is no early/late termination based on the quality of solutions found
-\end_layout
-
-\begin_layout Standard
-In this section we describe experiments using many more trial and search
- ranges focused on a single country, AUS.
-\end_layout
-
-\begin_layout Subsubsection
-Search dynamics
-\end_layout
-
-\begin_layout Standard
-In the experiments reported here we will generate a sample of 2500 trials
- of particular parameter pairs of initial infection and beta.
- The samples were generated by a CMAES search initiated with the bounds
- shown and initialized at the location of the red plus sign.
  
 \end_layout
 
 \begin_layout Standard
-On the left is a plot of the value surface, showing all sample points with
- darker blues indicating better fit values, a red plus sign showing the
- initial search parameter, and a green X showing the labeled best value
- found.
- Looking closely you can see several good value 
-\begin_inset Quotes eld
-\end_inset
-
-ridges
-\begin_inset Quotes erd
-\end_inset
-
- that have been sampled more densely.
- On the right is a more detailed contour plot showing an interpolated surface
- across these samples.
- It shows a highly textured, multi-modal region near the discovered optimum.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/values_testSearch_intrv.png
-	lyxscale 10
-	height 3in
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename figs/contour_testSearch_intrv.png
-	lyxscale 10
-	height 3in
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:valueSurface"
-
-\end_inset
-
-Value surface
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph
-Convergence to value optimum
-\end_layout
-
-\begin_layout Standard
-The samples were generated adaptively, towards better solutions across CMA-ES
- populations of size 100, in a series of 25 generations.
- The progression of this search process can be tracked according to several
- key statistics as they vary over generations.
-\end_layout
-
-\begin_layout Standard
-A first statistic is the model fit value parameter shown In Figure 
+Initial experiments calibrating Covasim with school intervention data were
+ done using CMA-ES.
+ The goal of providing a statistical foundation for model parameters found
+ via calibration, however, subsequently lead to the use of ABC methods as
+ described in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:valueConverge"
+reference "subsec:Calibration-using-ABC"
 plural "false"
 caps "false"
 noprefix "false"
@@ -3496,240 +1357,51 @@ noprefix "false"
 \end_inset
 
 .
- This shows fit value average, together with standard deviation bars.
- The later generations 10-25 have been broken out in an inset graph, the
- better to see the smaller values.
- After dramatic early improvements, model fit does not improve much after
- about 12 generations.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/val_testSearch_intrv.png
-	lyxscale 50
-	height 3in
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:valueConverge"
-
-\end_inset
-
-Value convergence
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Beta leads initialInfections
-\end_layout
-
-\begin_layout Standard
-Figure 
+ The ABC method is motivated there, along with experiments calibrating a
+ simpler compartmental ODE model to build intuition about ABC search.
+ The values found by ABC calibration are the ones described in all preceding
+ experiments.
+ Section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:parameterConverge"
+reference "subsec:Statistical-significance"
 plural "false"
 caps "false"
 noprefix "false"
 
 \end_inset
 
- considers the values of beta and initial infection independently.
- Values of beta converge more quickly and have stabilized by about generation
- 10.
- Values of initial infection continue to increase throughout all generations.
- Note in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:valueConverge"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-, however, that increasing initial infections does not change model fit
- much.
+ addresses the statistical signfiicance of the observed differences across
+ experiments.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/beta_testSearch_intrv.png
-	lyxscale 50
-	width 40page%
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename figs/infect_testSearch_intrv.png
-	lyxscale 50
-	width 40page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:parameterConverge"
-
-\end_inset
-
-Parameter convergence
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Deaths dominate diagnoses
-\end_layout
-
-\begin_layout Standard
-Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:deathDiagn"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- looks at the component measures on which model fits is evaluated: match
- with death data and match with diagnosis data.
- As expected, because it is weighted more heavily, matching death data drives
- the search.
- It is interesting to note that improvement with respect to in the two separate
- values (diagnoses and death) is well correlated across the generations
- of the search.
+Here we begin by putting all the various experimental results into a common
+ frame by considering their differing values for the calibrated parameters
  
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/cum_deaths_mismatch_testSearch_intrv.png
-	lyxscale 50
-	width 40page%
-
+\begin_inset Formula $\beta$
 \end_inset
 
-
-\begin_inset Graphics
-	filename figs/cum_diagnoses_mismatch_testSearch_intrv.png
-	lyxscale 50
-	width 40page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:deathDiagn"
-
-\end_inset
-
-Independent deaths and diagnoses
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-\begin_inset CommandInset label
-LatexCommand label
-name "subsec:Bounding-search"
-
-\end_inset
-
-Bounding search
-\end_layout
-
-\begin_layout Standard
-As mentioned earlier, global optimization procedures generally require bounds
- within which they are to search.
+ and 
+\noun on
+initInfect
+\noun default
+.
  Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:valueSurface-large"
+reference "fig:allCalibParam-HUN"
 plural "false"
 caps "false"
 noprefix "false"
 
 \end_inset
 
- can be compared to that originally shown in Figure 
+ focuses on HUN, the same example mentioned in the introduction and Section
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:valueSurface"
+reference "subsec:Incorporating-school-closure"
 plural "false"
 caps "false"
 noprefix "false"
@@ -3737,89 +1409,450 @@ noprefix "false"
 \end_inset
 
 .
- Here a range of initial infection sizes twice as large (50000 vs 25000)
- was allowed in the search.
- Again, the first plot shows similar ridges leading from the initial starting
- value, to an optima with about the same number of initial infections but
- a smaller beta.
- A second, vertical ridge is indicated leading to the very top boundary
- imposed by the a priori constraint.
+ The KDE for these parameters 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\noun on
+initInfect
+\noun default
+ found by ABC search are represented by the highlighted red point.
+ Three other points showing the parameter values 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\noun on
+initInfect
+\noun default
+ found and their respective fitnesses in their labels are also shown:
+\end_layout
+
+\begin_layout Itemize
+using search to establish the testing rate (vs.
+ the base model's use of data);
+\end_layout
+
+\begin_layout Itemize
+incorporating school interventions (vs.
+ not); and 
+\end_layout
+
+\begin_layout Itemize
+using CMA-ES to discover parameter values (vs.
+ ABC)
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/values_Trials_201008-2.png
-	lyxscale 10
-	height 3in
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename figs/contour_Trials_201008-2.png
-	lyxscale 10
-	height 3in
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:valueSurface-large"
-
-\end_inset
-
-Values across larger bounded region
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Back-of-the-envelope calculations regarding possible values for initial
- infections
+The 
+\noun on
+pyABC
+\noun default
+ library does not explicitly associate a fitness value with the KDE parameter
+ estimate
 \begin_inset Foot
 status collapsed
 
 \begin_layout Plain Layout
-r0 = number of contacts * days infectious * infection probability per contact
- per day so if we assume r0 = 2, 20 contacts, 8 days infectious, we get
- beta = 0.0125 [Cliff, 3 Oct]
+Specifically: pyabc.visualization.credible.compute_quantile(vals, w, 0.5)
 \end_layout
 
 \end_inset
 
- suggests that the second, upper attractor containing the optimum in this
- experiment should be discounted as implausible.
+ and so the 
+\emph on
+minimum
+\emph default
+ fitness point found during ABC search is also shown, and labeled with its
+ fitness.
+ The fitness values shown in the other labels is similarly taken from the
+ corresponding minimum fitness.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/vdeep-compAll-HUN-noErrBar.png
+	lyxscale 20
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:allCalibParam-HUN"
+
+\end_inset
+
+Calibrated parameters - HUN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that these data are plotted on logarithmic scales, and that all of
+ the pairwise differences are large.
  
 \end_layout
 
 \begin_layout Standard
-There is a clear bifurcation shown in the second contour plot.
- The lower upper bound on initial infection (25000) was selected to force
- search to include only the lower attractor.
- 
+This example (HUN) might make it appear as if the ABC-based experiments
+ cluster more closely with one another than with the values found by CMA-ES.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:modelComp-scatter"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ displays all 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\noun on
+initInfect
+\noun default
+ determined using the five measures above, and Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:modelCompFit"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the models' fit values.
+ Again, it is tempting to look for patterns (e.g., models with school closure
+ interventions made use of particularly high values of 
+\begin_inset Formula $\beta$
+\end_inset
+
+, CMA-ES calibration made use of lower 
+\noun on
+initInfect
+\noun default
+), but there does not seem to be any general pattern distinguishing any
+ of the experimental conditions.
+ The next section helps to explain why.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/vdeep-comp-modelScatter.png
+	lyxscale 20
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:modelComp-scatter"
+
+\end_inset
+
+Alternative model parameter values
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/vdeep-comps-modelFit.png
+	lyxscale 20
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:modelCompFit"
+
+\end_inset
+
+Alternative model fit
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Statistical significance
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Statistical-significance"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A key advantage of ABC methods is that they can provide kernel density estimates
+ of the parameters they find that minimize model fit.
+ For SMC-ABC this requires weighting samples according to their 
+\begin_inset Quotes eld
+\end_inset
+
+importance
+\begin_inset Quotes erd
+\end_inset
+
+ and then computing credible intervals of some confidence.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:allCalibParam-HUN-errBar"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the same data points for HUN as in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:allCalibParam-HUN"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, together with confidence=0.9 error bars on the 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\noun on
+initInfect 
+\noun default
+of the KDE estimate.
+ For HUN, and for every other country modeled, the confidence intervals
+ of the best KDE estimates far exceed differences between any of the experimenta
+l conditions.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/vdeep-compAll-HUN-errBar.png
+	lyxscale 20
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:allCalibParam-HUN-errBar"
+
+\end_inset
+
+Calibrated parameters with credible intervals - HUN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Sensitivity analysis
+\end_layout
+
+\begin_layout Standard
+To test whether the KDE parameters associated with calibrated models were
+ sufficient to distinguish models with and without school interventions,
+ a separate set of experiments were run to replicate model predictions near
+ these values.
+ For each country, final 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and 
+\noun on
+initInfect 
+\noun default
+values were taken (cf.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:modelComp-scatter"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) and a small amount (1%) noise was added to these for each of a set of
+ replicated runs near these values, for models both with and without school
+ interventions included.
+ The results are shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:intrvnImpact"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, showing the averge number of cummulative infections (normalized by population)
+ with standard deviation bars over the set of replicated experiments.
+ Most countries show very low normalized infection levels in either case.
+ For countries with signficant infection numbers, some countries (e.g., CHL)
+ show the expected pattern of reduced infections with school interventions,
+ many countries (e.g., IRN) show the opposite change, and many others (e.g.,
+ KWT) show that the two models cannot be discriminated.
+ These differences could not be attributed to the number of days of school
+ closure (cf.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:countrySumm"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) (data not shown).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename figs/interventionImpact.png
+	lyxscale 20
+	width 80page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:intrvnImpact"
+
+\end_inset
+
+Intervention impact
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -3828,10 +1861,17 @@ Methods
 
 \begin_layout Subsection
 Data sources
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Data-sources"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-ECDC used as primary organizing data source.
+The ECDC was used as the primary organizing data source.
  ISO3 codes were used to identify and merge country data.
 \begin_inset Foot
 status collapsed
@@ -4037,8 +2077,8 @@ noprefix "false"
 
 \end_inset
 
- shows two countries' examples: MNG, a country with nearly overlapping accounts;
- and UZB with more discordant ones.
+ shows two countries' examples: BHR, a country with exactly overlapping
+ accounts and DNK with more discordant ones.
  The graphs each show two plots of when school closures were in effect (a
  value of 1, vs.
  0 when not in effect) as described by a source.
@@ -4048,13 +2088,13 @@ noprefix "false"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \noindent
 \align center
 \begin_inset Graphics
-	filename figs/MNG_ox-unesco_educIntrvn.png
+	filename figs/BHR_ox-unesco_educIntrvn.png
 	lyxscale 25
 	width 40page%
 
@@ -4062,7 +2102,7 @@ status collapsed
 
  
 \begin_inset Graphics
-	filename figs/UZB_ox-unesco_educIntrvn.png
+	filename figs/DNK_ox-unesco_educIntrvn.png
 	lyxscale 25
 	width 40page%
 
@@ -4103,7 +2143,7 @@ The specification of school closures used in these experiments was conservative:
 both
 \emph default
  sources, for periods > 14 days were considered.
- 136 countries had school interventions that satisfied these criteria.
+ 78 countries had school interventions that satisfied these criteria.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4134,66 +2174,15 @@ noprefix "false"
  the country's population and averaging across the time period of the simulation.
 \end_layout
 
-\begin_layout Standard
-Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:countryData"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- summarizes the 136 countries included in this study: their name, ISO-3
- code, and whether or not they had testing rate data available about them.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename figs/dataOverlapTbl.png
-	lyxscale 25
-	width 80page%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:countryData"
-
-\end_inset
-
-Countries' data
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsection
 Covasim
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Covasim"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4235,9 +2224,21 @@ The basic model requires specification of two key parameters, the initial
 \end_layout
 
 \begin_layout Standard
-As data regarding deaths is believed to generally more accurate than that
- about positive tests, Covasim uses a weighted sum of error with death rates
- weighted twice as heavily as diagnoses.
+Better models are those whose simulated estimates for diagnoses and deaths
+ are closer to available data.
+ In experiments here we used Covasim's default 
+\begin_inset CommandInset href
+LatexCommand href
+name "Fit measure"
+target "https://docs.idmod.org/projects/covasim/en/latest/tutorials/t7.html?highlight=fit#The-Fit-object"
+literal "false"
+
+\end_inset
+
+ (normalized absolute difference) of mismatch.
+ As data regarding deaths is believed to generally more accurate than that
+ about positive diagnoses, Covasim uses a weighted sum of error with death
+ rates weighted twice as heavily as diagnoses.
 \end_layout
 
 \begin_layout Standard
@@ -4246,7 +2247,7 @@ School closures are modeled as a simple on/off: school closings start/stop
 \begin_inset Formula $\beta$
 \end_inset
 
- are again enhanced or attenuated.
+ are enhanced or attenuated.
  Following 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -4261,8 +2262,8 @@ literal "false"
 \begin_inset Formula $\beta$
 \end_inset
 
- incorporating both basic Covasim values and the result of school interventions
- are shown in Table 
+ incorporating both default Covasim values and the result of school intervention
+s are shown in Table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:beta-levels"
@@ -4279,7 +2280,7 @@ noprefix "false"
 \begin_inset Float table
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
@@ -4766,7 +2767,14 @@ Per-level
 \end_layout
 
 \begin_layout Subsection
-CMA-ES
+Calibration using CMA-ES
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Calibration-using-CMA-ES"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4817,39 +2825,13 @@ tell-ask
 \end_layout
 
 \begin_layout Standard
-CMA-ES was used as the 
-\begin_inset Quotes eld
-\end_inset
-
-calibration
-\begin_inset Quotes erd
-\end_inset
-
- outer-loop around the basic Covasim simulation to search for key parameter
- values that allow the model to best 
-\begin_inset Quotes eld
-\end_inset
-
-fit
-\begin_inset Quotes erd
-\end_inset
-
- against data.
+CMA-ES was used as one calibration outer-loop around the basic Covasim simulatio
+n to search for key parameter values that allow the model to best fit against
+ data.
  Preliminary experiments across a large number of trials on a single country
- (cf.
- Section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "subsec:Model-calibration"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-) identified 25 generations of 32 individuals each as being reasonable;
- i.e., 800 trials total were allocated to find the search for parameter values
- causing the model to best fit the data.
+ (data not shown) identified 25 generations of 32 individuals = 800 trials
+ total were allocated to find the search for parameter values causing the
+ model to best fit the data.
  Optimization is always over two parameters, 
 \begin_inset Formula $\beta$
 \end_inset
@@ -4859,21 +2841,15 @@ noprefix "false"
 initInfect
 \noun default
 , the number of initial infections.
- Based on the experiments reported in Section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "subsec:Model-calibration"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-, initial search bounds for the optimization were set:
+ Initial search bounds for the optimization were set:
 \end_layout
 
 \begin_layout Itemize
-initial infected: best = 21000, lower bound =16000, upper bound=26000
+
+\noun on
+initInfect
+\noun default
+: best = 21000, lower bound =16000, upper bound=26000
 \end_layout
 
 \begin_layout Itemize
@@ -4887,7 +2863,7 @@ initial infected: best = 21000, lower bound =16000, upper bound=26000
 In the experiments described in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:searchDataTR"
+reference "subsec:dataTR"
 plural "false"
 caps "false"
 noprefix "false"
@@ -4895,7 +2871,7 @@ noprefix "false"
 \end_inset
 
 , a third parameter corresponding to testing rate is also included.
- Bounds on its search were established using the data for the 87 countries
+ Bounds on its search were established using the data for the 78 countries
  available:
 \end_layout
 
@@ -4903,154 +2879,111 @@ noprefix "false"
 testingRate: best=3.3e-4, lower bound = 2e-6, upper bound=3e-3
 \end_layout
 
-\begin_layout Section
-Next steps
-\end_layout
-
-\begin_layout Itemize
-Use TPE (Tree-structured Parzen Estimator) optimization ala Optuna
-\end_layout
-
 \begin_layout Subsection
-Model validation
-\end_layout
-
-\begin_layout Enumerate
-{lauerReich20}: Infectious Disease Forecasting for Public Health 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "lauerReich20"
-literal "false"
+Calibration using ABC
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Calibration-using-ABC"
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Enumerate
-{bergmeir18}:A note on the validity of cross-validation for evaluating autoregre
-ssive time series prediction 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "bergmeir18"
-literal "false"
+\begin_layout Standard
+Bayesian methods are distinguished by their inference of a posterior distributio
+n for some set of parameters 
+\begin_inset Formula $\theta$
+\end_inset
+
+ from the likelihood of observed data given these values 
+\begin_inset Formula $\pi(y|\theta)$
+\end_inset
+
+ and estimation of the parameters prior to using any data 
+\begin_inset Formula $\pi(\theta)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\pi(\theta|y)\,\propto\pi(y|\theta)\,\pi(\theta)
+\]
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Enumerate
-{bergmeirBenitez12}: On the use of cross-validation for time series predictor
- evaluation 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "bergmeirBenitez12"
-literal "false"
-
+\begin_layout Standard
+Many issues arise (e.g., determining the normalization constant) in translating
+ this probabilistic strategy into an empirical estimate, but a deeper issue
+ concerns models with 
+\begin_inset Quotes eld
 \end_inset
 
-
-\end_layout
-
-\begin_layout Subsection
-Integration of genomic data: molecular epidemiology
-\end_layout
-
-\begin_layout Itemize
-Rockett 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Rockett:2020uf"
-literal "false"
-
+hidden
+\begin_inset Quotes erd
 \end_inset
 
-
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-examine the added value of near real-time genome sequencing of SARS-CoV-2
- in a subpopulation of infected patients during the first 10 weeks of COVID-19
- containment in Australia and compare findings from genomic surveillance
- with predictions of a computational agent-based model (ABM)
-\end_layout
-
-\begin_layout Enumerate
-based on AceMOD
-\end_layout
-
-\begin_layout Enumerate
-21 January and 28 March 2020, 1,617 cases of COVID- 19 were diagnosed and
- reported to the NSW Ministry of Health.
- All patients resided in metropolitan Sydney.
+ variables not reflected in observable data.
+ The basic Bayesian inference can be extended to consider hidden variables
  
-\end_layout
+\begin_inset Formula $x$
+\end_inset
 
-\end_deeper
-\begin_layout Section
-Conclusions
-\end_layout
+ using the joint likelihood of the data with these variables 
+\begin_inset Formula $\pi(y,x|\theta)$
+\end_inset
 
-\begin_layout Subsection
-Lessons learned
-\end_layout
-
-\begin_layout Itemize
-Be careful with standardization of country naming and data:
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Note excluded countries from the ECDC lists: TWN and HNG
-\end_layout
-
-\begin_layout Itemize
-cf 
-\family typewriter
-covasim.
- normalizeCVAgeData()
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Select which parameters you choose to calibrate, and their initial bounds,
- carefully.
-\end_layout
-
-\begin_layout Itemize
-Differences in Covasim value/fit < 100 are not significant; larger differences
- may not be either.
-\end_layout
-
-\begin_layout Subsection
-Honest priors
+:
 \end_layout
 
 \begin_layout Standard
-Efforts towards placing models like the ones considered here on firm statistical
- foundations require better answers to a number of questions:
-\end_layout
+\begin_inset Formula 
+\[
+\pi(\theta,x|y)\,\propto\pi(y,x|\theta)\,\pi(\theta)
+\]
 
-\begin_layout Itemize
-How do the bounds established on global optimization, and artifacts of the
- global search process, impact our understanding of the priors they impose
- on nodel results?
-\end_layout
+\end_inset
 
-\begin_layout Itemize
-How best to capture the sensitivity of our results given uncertainty in
- testing rates?
-\end_layout
 
-\begin_layout Itemize
-What accuracy can we claim for model parameter estimation? 
 \end_layout
 
 \begin_layout Standard
-Promising approaches include Approximate Bayesian Computation (ABC) and
- history matching 
+Simulations like Covasim can, when given input parameters 
+\begin_inset Formula $\theta$
+\end_inset
+
+, provide samples of data and hidden variable values from the joint likelihood
+ function.
+ Sampling methods like Markov Chain Monte Carlo (MCMC) can then provide
+ numerical estimates for the posterior distribution.
+ Approximate Bayesian Computation versions of MCMC (ABC-MCMC) proceed by
+ iteratively selecting 
+\begin_inset Quotes eld
+\end_inset
+
+particles
+\begin_inset Quotes erd
+\end_inset
+
+ (simulations run with parameters 
+\begin_inset Formula $\theta_{i}$
+\end_inset
+
+) that produce predictions 
+\begin_inset Formula $z_{i}$
+\end_inset
+
+ that are required to be closer 
+\begin_inset Formula $||y-z_{i}||<\epsilon$
+\end_inset
+
+ to observed data, rejecting those that are not, and resampling 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "mckinley2018"
@@ -5059,103 +2992,232 @@ literal "false"
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Subsection
-Scientific sharing, publishing and open source models
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{quotation}
-\end_layout
-
+ Sequential Monte Carlo ABC (SMC-ABC) techniques specify a transition kernel
+ for generating new parameters to test and a method for reducing 
+\begin_inset Formula $\epsilon_{t}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Early models relied on sparse, sometimes unreliable, data, and modelers
- did not anticipate the emergence of important new facts....
- For use in an emergency, models developed through basic research need to
- be “operationalized”—that is, made robust for evaluating specific policy
- interventions.
- “Nowcasting” requires models that integrate incomplete, real-time data
- and emerging medical knowledge to provide situational awareness....
- Models must also incorporate behavioral responses to policy interventions
- that may change the course of an epidemic.
- 
+ over iterations 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Press1015"
+key "10.1093/bioinformatics/btp619"
 literal "false"
 
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status open
 
-\begin_layout Plain Layout
-
-
-\backslash
-end{quotation}
-\end_layout
+\noun on
+pyABC
+\noun default
+ provides a Python implementation of SMC-ABC supporting parallel execution
+ of simulations on multicore hardware 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "10.1093/bioinformatics/bty361"
+literal "false"
 
 \end_inset
 
+.
+ Simulations were given a uniform prior distribution over the same bounds
+ used for CMA-ES optimization.
+ Other parameters control resources allocated to SMC-ABC search such as
+ the maximum number of 
+\begin_inset Quotes eld
+\end_inset
 
+generations
+\begin_inset Quotes erd
+\end_inset
+
+ of search reducing 
+\begin_inset Formula $\epsilon_{t}$
+\end_inset
+
+, an absolute minimum on 
+\begin_inset Formula $\epsilon_{t}$
+\end_inset
+
+, etc.
 \end_layout
 
 \begin_layout Standard
-Traditional compartmental models represent the core of epidemiological predictio
-n efforts, but become constrained as more fine-grained compartments are
- considered.
- Models like Covasim bring the expressive power of agent-based desciptions
- of behaviors over networks to allow evaluation of many varieties of interventio
-n strategies and empirical testing against many data sources, but are more
- difficult to make statistical inferences about.
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:pyABC-search"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ gives a sense of the search performed by 
+\noun on
+pyABC, 
+\noun default
+in this case for NZL.
  
-\end_layout
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:pyABC-search"
+plural "false"
+caps "false"
+noprefix "false"
 
-\begin_layout Standard
-The well-engineered, open source Covasim codebase allows independent model
- components to be investigated and incorporated separately.
- Basic agent-based models can be related directly to compartment model analogs.
- Careful experimentation building from these may be able to extend the results
- into mathematically intractable regimes.
- The publishing of full model implementation details, like that included
- with the Panovska-Griffiths publication
-\begin_inset CommandInset citation
-LatexCommand cite
-key "jpg20"
-literal "false"
+\end_inset
 
+.a shows the converging posterior estimates for 
+\begin_inset Formula $\beta$
 \end_inset
 
  and 
-\begin_inset CommandInset href
-LatexCommand href
-name "code repository"
-target "https://github.com/Jasminapg/Covid-19-Analysis"
-literal "false"
+\noun on
+initInfect 
+\noun default
+over the generations of search, and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:pyABC-search"
+plural "false"
+caps "false"
+noprefix "false"
 
 \end_inset
 
- is an excellent example.
- The COVID-19 pandemic, and others to come, demand fast-paced scientific
- sharing that is catalyzed by such interactions.
+.b shows the declining 
+\begin_inset Formula $\epsilon_{t}$
+\end_inset
+
+ used to drive the search to better and better fitting models.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figs/vdeep-NZL-history.png
+	lyxscale 25
+	width 40page%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figs/vdeep-NZL-eps.png
+	lyxscale 25
+	width 40page%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\noun on
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:pyABC-search"
+
+\end_inset
+
+pyABC 
+\noun default
+search for NZL parameters
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+Experiments reported considered a standardized modeling approach applied
+ across a broad range of countries.
+ The countries were selected because they had available data on both nation-wide
+ school closures and testing rates during early, dynamic days of the pandemic
+ in early 2020.
+ It was expected that incorporating school interventions into models would
+ allow them to better fit data concerning deaths and diagnoses, but that
+ was not found to be the case.
+ Similarly, it was expected than making use of data on testing rates within
+ countries would lead to better models than assuming a constant testing
+ rate or allowing calibration to set testing rates at levels that lead to
+ better fitting models.
+ While calibrated testing rates did differ considerably from data-based
+ values, differences in the resulting models did lead to better fit with
+ deaths and diagnosis data.
+ A comparison of global CMA-ES optimization techniques to Bayesian SMC-ABC
+ calibration showed broadly consistent results in the parameter values discovere
+d by the two methods.
+ But the explicit calculation of posterior probabilities allowed by the
+ SMC-ABC methods suggest that none of the observed variations across experiments
+ can be made with statistical confidence.
 \end_layout
 
 \begin_layout Standard
@@ -5170,7 +3232,7 @@ literal "false"
 LatexCommand bibtex
 btprint "btPrintCited"
 bibfiles "covid"
-options "plain"
+options "achemso"
 
 \end_inset
 
