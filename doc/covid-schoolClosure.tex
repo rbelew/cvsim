@@ -20,7 +20,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
 
-\title{Generalized modeling of interventions across 78 countries}
+\title{Generalized modeling of interventions across 77 countries}
 \newcommand{\noun}[1]{\textsc{#1}}
 %% Because html converters don't know tabularnewline
 \providecommand{\tabularnewline}{\\}
@@ -44,14 +44,14 @@
 \email{j.panovska-griffiths@ucl.ac.uk}
 \affiliation{University College London}
 
-\author{Dina Mistry}
-\email{dmistry@idmod.org}
-\affiliation{Institute for Disease Modeling, Bellevue, WA}
+\author{William Waites}
+\email{wwaites@tardis.ed.ac.uk}
+\affiliation{London School of Hygiene and Tropical Medicine}
 
 \SectionNumbersOn
 
 \pagestyle{myheadings}
-\markboth{Generalized models of 78 countries - Draft 8 Mar 20}{Generalized models of 78 countries - Draft 8 Mar 21}
+\markboth{Generalized models of 77 countries - Draft 16 Mar 20}{Generalized models of 77 countries - Draft 16 Mar 21}
 
 % \DeclareBibliographyCategory{cited}
 % \AtEveryCitekey{\addtocategory{cited}{\thefield{entrykey}}}
@@ -65,7 +65,7 @@
 
 \begin{document}
 \noindent \begin{center}
-\emph{Draft: 8 Mar 2021}
+\emph{Draft: 16 Mar 2021}
 \par\end{center}
 \begin{abstract}
 COVID-19 continues to spread around the world and modeling plays an
@@ -74,12 +74,11 @@ model called Covasim has recently been fit to data regarding confirmed
 cases and deaths experience in the United Kingdom during the first
 half of 2020, and then used it to evaluate alternative intervention
 strategies there \cite{jpg20}. We extend this methodology to consider
-data from 78 countries for which both intervention data and data concerning
-testing rates is available to retrospectively model interventions
-employed in the first months of 2020 in these countries. Because the
-age distribution of populations is a key feature of the COVID-19 pandemic
-and contacts among young people are often age-stratified and may play
-an especially important role, we focus here on school closure interventions. 
+data from 77 countries to retrospectively model interventions employed
+in the first months of 2020 in these countries. Because the age distribution
+of populations is a key feature of the COVID-19 pandemic and contacts
+among young people are often age-stratified and may play an especially
+important role, we focus here on school closure interventions. 
 
 A Covasim model was built for each country, with its population, age
 distribution, disease emergence and school closing dates specified.
@@ -99,14 +98,20 @@ diagnoses and deaths?
 
 The calibration of model parameters plays an important role in their
 evaluation, and an analysis of methods used to calibrate models is
-considered in detail. First, experiments using global optimization
-methods are used to search for model parameters that allowed a model
-to best fit available data. Second, Approximate Bayesian Computation
-(ABC) techniques were used to find model parameters with maximal posterior
-probability according to kernal density estimates. ABC methods allow
-estimation of our confidence in the calibrated models' parameters,
-and they suggest we can \emph{not} reject the null hypothesis:  adding
-school interventions can not be shown to improve the model.
+considered in detail. Experiments using Covariance Matrix Adaptation
+Evolution Strategy (CMA-ES) to search for model parameters that allowed
+a model to best fit available data, and contrasted with parameters
+found using the \noun{pyABC} library to implement Approximate Bayesian
+Computation (ABC) techniques which also provided kernal density estimates
+(KDE). 
+
+In only one of the 77 countries considered did model parameters using
+testing rate data differ significantly from ones using search to calibrate
+this value. Incorporation of school intervention in models lead to
+significant differences in 22 cases, but surprisingly with only two
+having better model fit with intervention modeled. Beyond the KDE
+estimates it provides, in most cases \noun{pyABC} proves to be an
+even more effective parameter search method than CMA-ES.
 \end{abstract}
 
 \section{Introduction}
@@ -163,15 +168,17 @@ COVID-19 pandemic and contacts among young people are often age-stratified
 and may play an especially important role, we focus here on school
 closure interventions. 
 
-Table \ref{fig:countrySumm} lists the 78 countries included in this
+Table \ref{fig:countrySumm} lists the 77 countries included in this
 study with their ISO-3 code and name, together with key statistics:
 \begin{itemize}
 \item population in 2019, from ECDC 
 \item the start date for their simulation (when the number of infection
-first went > 50)
-\item number of days with data regarding testing
-\item number of days closed by school interventions, together with the starting
-and ending dates
+first went above 50)
+\item the start and end dates of the school intervention; the ``effective''
+start date is different in those cases that the intervention began
+before the simulation's start date
+\item number of days closed by school interventions, and the fraction of
+total simulated days this represents
 \end{itemize}
 Note that the countries modeled varied in population from just over
 a million (EST) to IND with a population of 1.4 billion.
@@ -184,9 +191,9 @@ a million (EST) to IND with a population of 1.4 billion.
 \end{figure}
 
 To give a preview of the experiments to be presented, consider the
-comparison of two runs presented in Figure \ref{fig:comp-noSchool-HUN}.
+comparison of two runs presented in Figure \ref{fig:comp-noSchool-SRB}.
 This shows six curves summarizing two simulation run for the country
-of Hungary (ISO3 code HUN). The two curves in the top left graph show
+of Serbia (ISO3 code SRB). The two curves in the top left graph show
 the simulation's estimate (solid line) and data (boxes) of cummulative
 diagnoses during early 2020, the middle graph shows estimated vs.
 data on cummulative deaths, and the lowest graph shows the cummulative
@@ -202,9 +209,9 @@ the model.
 
 \begin{figure}
 \noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep_noVSchool_210307-HUN}
+\includegraphics[width=0.8\paperwidth]{figs/compSchool-fit_SRB}
 \par\end{centering}
-\caption{\label{fig:comp-noSchool-HUN}Model predictions for HUN, without and
+\caption{\label{fig:comp-noSchool-SRB}Model predictions for SRB, without and
 with intervention}
 \end{figure}
 
@@ -252,7 +259,7 @@ considered in Section \ref{subsec:calibration}.
 Covasim defines the value of a model's fit to be a weighted sum of
 the error between its predicted number of diagnoses and deaths related
 to COVID-19 and data for these values. Figure \ref{fig:base-fit}
-shows the range of resulting model fits across 78 countries, with
+shows the range of resulting model fits across 77 countries, with
 lower fitness scores assigned to simulations with a better match of
 predictions for the number of diagnoses and deaths. Most countries
 have fit values below 150, and the average fit across countries is
@@ -266,11 +273,10 @@ have fit values below 150, and the average fit across countries is
 \end{figure}
 
 Figure \ref{fig:base-examples} shows the result of two simulation
-for COL and SGP; COL fit is the best, and SGP is one of the worst.
+for ETH and SGP; ETH fit is one of the best, and SGP is the worst.
 For each country, the top two plots capture model behavior relative
 to data for the number of diagnoses across the time interval considered.
-The bottom plot shows the number of tests that would have been given
-over time. 
+The bottom plot shows the number of tests given over time. 
 
 \begin{figure}
 \noindent \begin{centering}
@@ -282,12 +288,11 @@ over time.
 Figure \ref{fig:base-keyParam} shows the values of the key \noun{initInfect}
 and $\beta$ parameters for all countries. Best KDE estimates for
 \noun{initInfect} vary by three orders of magnitude, and those for
-$\beta$ vary by a factor of three.\footnote{KDE \noun{initInfect}: SGN=1137; TUR=45026. KDE $\beta$: PSE=0.0016;
-GHA=0.0059 }.
+$\beta$ vary by a factor of three.
 
 \begin{figure}
 \noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep-keyParam}
+\includegraphics[width=0.8\paperwidth]{figs/vdeep-primaryParam}
 \par\end{centering}
 \caption{\label{fig:base-keyParam}Base model key parameter distribution}
 \end{figure}
@@ -301,31 +306,36 @@ Experiments over countries with data on testing rates (daily testing
 counts as a fraction of the country's population) via OWID were contrasted
 with average testing rates found via calibration. Figure \ref{fig:dataVsearchTrate}
 contrasts the testing rate found via calibration search vs. the data-based
-rate
+rate, with bubble size reflecting the difference in fitness between
+the two models\footnote{Because bubble sizes must be positive, blue bubbles are used to show
+improved fitness with calibrated testing rates, red bubbles with data-based
+testing rates.}.
 
 \begin{figure}
 \noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/compdataSearch2_210227}
+\includegraphics[width=0.8\paperwidth]{figs/compdataSearchFitness-annote_210316}
 \par\end{centering}
-\caption{\label{fig:dataVsearchTrate}Testing rate from data vs. via search}
+\caption{\label{fig:dataVsearchTrate}Testing rate from data vs. calibration}
 \end{figure}
 
 The testing rates identified via calibration were generally much larger
 (20x) than the data-based values. Two countries, ARE and BHR, had
 much higher testing rates reported in the data than the others, with
-little difference reflected by their calibrated values. None of the
-models' fit changed appreciably (+/-200) using one or the other source
-of testing rate. As a baseline, these results were also compared to
-ones using the same, constant testing rate (as a fraction of the population
-tested per day) of \noun{testing\_rate}=3.3e-4, the average across
-all countries with data (shown as a red line in Figure \ref{fig:dataVsearchTrate}).
-Again, simulations using this value for testing rate did not appreciably
-change model fit from ones using data-based values.
+little difference reflected by their calibrated values. Only the difference
+in testing rates for OMN proves signficantly different (cf. Section
+\ref{subsec:Statistical-significance}). 
+
+As a baseline, these results were also compared to ones using the
+same, constant testing rate (as a fraction of the population tested
+per day) of \noun{testing\_rate}=3.3e-4, the average across all countries
+with data (shown as a red line in Figure \ref{fig:dataVsearchTrate}).
+Simulations using this value for testing rate did not appreciably
+change model fit from ones using data-based values (data not shown).
 
 Note that the difference between predicted testing rate and data regarding
-this value was not used by the calibration process in these experiments
-to guide the search for model parameters, although Covasim's Fit measure
-could be modified to do so. 
+this value was \emph{not} used by the calibration process in these
+experiments to guide the search for model parameters, although Covasim's
+Fit measure could be modified to do so. 
 
 \subsection{Incorporating school closure interventions\label{subsec:Incorporating-school-closure}}
 
@@ -337,26 +347,32 @@ fit, negative differences indicate models which were improved with
 interventions modeled, and positive differences indicate poorer fit
 when interventions are included. When model fit changed, the model
 \emph{without} school intervention modeled was typically superior.
+Figure \ref{fig:intrvnFitDiff} also breaks out those countries for
+which the different in $\beta$ values between the two models was
+found to be significantly different (cf. Table \ref{tab:Countries-with-significant}).
 
 \begin{figure}
 \noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep_noVSchool_210307-fitDiff}
+\includegraphics[width=0.8\paperwidth]{figs/compSchool_210316-annote}
 \par\end{centering}
 \caption{\label{fig:intrvnFitDiff}Change in fitness with intervention}
 \end{figure}
 
-Figure \ref{fig:intrvn-goodEg} shows the curves for two countries,
-HUN (highlighted green in Figure \ref{fig:intrvnFitDiff}) and ITA
-(red) for which incorporation of school interventions decreased (i.e.,
-improved) or increased (harmed) their fit most. The dashed lines in
-the right-hand figures reflect the beginning and ending dates of the
-interventions.
+The example of SRB used in Figure \ref{fig:comp-noSchool-SRB} showed
+a slight improvement in fit (difference = -23.6). The dashed lines
+in the right-hand figures reflect the beginning and ending dates of
+the interventions. ISR is the only other country's model with improved
+fitness (difference= -35.3) and significant difference in $\beta$
+values. In contrast, the results for ITA shown in Figure \ref{fig:intrvn-badExample-ITA}shows
+incorporation of school interventions increased (harmed) the fit most
+(difference=196.0). The differences in $\beta$ values was statistically
+significant for ITA and all others with fitness differences > 100.
 
 \begin{figure}
 \noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep_noVSchool_210307-HUN+ITA}
+\includegraphics[width=0.8\paperwidth]{figs/vdeep_noVSchool_210307-ITA}
 \par\end{centering}
-\caption{\label{fig:intrvn-goodEg}Intervention changes for HUN and ITA}
+\caption{\label{fig:intrvn-badExample-ITA}Intervention change ITA}
 \end{figure}
 
 
@@ -393,112 +409,226 @@ across experiments.
 
 Here we begin by putting all the various experimental results into
 a common frame by considering their differing values for the calibrated
-parameters $\beta$ and \noun{initInfect}. Figure \ref{fig:allCalibParam-HUN}
-focuses on HUN, the same example mentioned in the introduction and
+parameters $\beta$ and \noun{initInfect}. Figure \ref{fig:allCalibParam-SRB}
+focuses on SRB, the same example mentioned in the introduction and
 Section \ref{subsec:Incorporating-school-closure}. The KDE for these
 parameters $\beta$ and \noun{initInfect} found by ABC search are
-represented by the highlighted red point. Three other points showing
-the parameter values $\beta$ and \noun{initInfect} found and their
-respective fitnesses in their labels are also shown:
-\begin{itemize}
+represented by the highlighted red point. A key advantage of ABC methods
+is that they can provide kernel density estimates of the parameters
+they find that minimize model fit. For SMC-ABC this requires weighting
+samples according to their ``importance'' and then computing credible
+intervals of some confidence. Confidence=0.9 error bars on the $\beta$
+and \noun{initInfect }of the KDE estimate are also displayed.
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[width=0.8\paperwidth]{figs/vdeep-compAll-SRB}
+\par\end{centering}
+\caption{\label{fig:allCalibParam-SRB}Calibrated parameters with credible
+intervals - SRB}
+\end{figure}
+
+Three other points showing the parameter values $\beta$ and \noun{initInfect}
+found and their respective fitnesses in their labels are also shown:
+\begin{enumerate}
 \item using search to establish the testing rate (vs. the base model's use
 of data);
 \item incorporating school interventions (vs. not); and 
 \item using CMA-ES to discover parameter values (vs. ABC)
-\end{itemize}
+\end{enumerate}
+The first two experiments also provide KDE estimates, and the error
+bars for these are shown. 
+
 The \noun{pyABC} library does not explicitly associate a fitness value
 with the KDE parameter estimate\footnote{Specifically: pyabc.visualization.credible.compute\_quantile(vals,
 w, 0.5)} and so the \emph{minimum} fitness point found during ABC search is
 also shown, and labeled with its fitness. The fitness values shown
 in the other labels is similarly taken from the corresponding minimum
-fitness.
-
-\begin{figure}
-\noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep-compAll-HUN-noErrBar}
-\par\end{centering}
-\caption{\label{fig:allCalibParam-HUN}Calibrated parameters - HUN}
-\end{figure}
-
-Note that these data are plotted on logarithmic scales, and that all
-of the pairwise differences are large. 
-
-This example (HUN) might make it appear as if the ABC-based experiments
-cluster more closely with one another than with the values found by
-CMA-ES. Figure \ref{fig:modelComp-scatter} displays all $\beta$
-and \noun{initInfect} determined using the five measures above, and
-Figure \ref{fig:modelCompFit} shows the models' fit values. Again,
-it is tempting to look for patterns (e.g., models with school closure
-interventions made use of particularly high values of $\beta$, CMA-ES
-calibration made use of lower \noun{initInfect}), but there does not
-seem to be any general pattern distinguishing any of the experimental
-conditions. The next section helps to explain why.
-
-\begin{figure}
-\noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep-comp-modelScatter}
-\par\end{centering}
-\caption{\label{fig:modelComp-scatter}Alternative model parameter values}
-\end{figure}
-
-\begin{figure}
-\noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep-comps-modelFit}
-\par\end{centering}
-\caption{\label{fig:modelCompFit}Alternative model fit}
-\end{figure}
-
+fitness. 
 
 \subsection{Statistical significance\label{subsec:Statistical-significance}}
 
-A key advantage of ABC methods is that they can provide kernel density
-estimates of the parameters they find that minimize model fit. For
-SMC-ABC this requires weighting samples according to their ``importance''
-and then computing credible intervals of some confidence.
+The disjoint error bars in Figure \ref{fig:allCalibParam-SRB} imply
+that in the case of SRB, the difference in $\beta$ and \noun{initInfect}
+parameters on effects on models with/out school intervention can be
+considered statistically significant at the 90\% confidence level.
+Across the 77 countries considered, in 22 of them the differences
+in $\beta$ satisfied this significance test. 
 
-Figure \ref{fig:allCalibParam-HUN-errBar} shows the same data points
-for HUN as in Figure \ref{fig:allCalibParam-HUN}, together with confidence=0.9
-error bars on the $\beta$ and \noun{initInfect }of the KDE estimate.
-For HUN, and for every other country modeled, the confidence intervals
-of the best KDE estimates far exceed differences between any of the
-experimental conditions.
+\begin{table}
+\noindent \begin{centering}
+\begin{tabular}{|c|c|c|c|c|}
+\hline 
+ISO3 & KDE\_fit & school\_fit & diff & Beta-KDE\tabularnewline
+\hline 
+\hline 
+ISR & 60.8 & 25.5 & -35.3 & 0.0049\tabularnewline
+\hline 
+SRB & 55.2 & 31.6 & -23.6 & 0.0044\tabularnewline
+\hline 
+PSE & 122.9 & 116.8 & -6.1 & 0.0016\tabularnewline
+\hline 
+GRC & 44.8 & 40.3 & -4.5 & 0.0035\tabularnewline
+\hline 
+MYS & 37.1 & 44.3 & 7.2 & 0.0030\tabularnewline
+\hline 
+THA & 94.2 & 101.7 & 7.5 & 0.0029\tabularnewline
+\hline 
+PRT & 63.9 & 72.8 & 9.0 & 0.0038\tabularnewline
+\hline 
+SVK & 43.0 & 52.1 & 9.1 & 0.0034\tabularnewline
+\hline 
+FRA & 108.7 & 126.1 & 17.5 & 0.0053\tabularnewline
+\hline 
+DEU & 65.2 & 92.4 & 27.1 & 0.0056\tabularnewline
+\hline 
+NLD & 79.7 & 117.3 & 37.6 & 0.0045\tabularnewline
+\hline 
+IDN & 24.5 & 65.2 & 40.8 & 0.0047\tabularnewline
+\hline 
+PHL & 26.5 & 77.5 & 51.0 & 0.0044\tabularnewline
+\hline 
+GBR & 91.5 & 144.6 & 53.1 & 0.0058\tabularnewline
+\hline 
+NGA & 24.7 & 84.8 & 60.1 & 0.0047\tabularnewline
+\hline 
+CAN & 72.5 & 147.8 & 75.2 & 0.0049\tabularnewline
+\hline 
+IRN & 91.2 & 173.1 & 82.0 & 0.0048\tabularnewline
+\hline 
+IND & 18.1 & 122.6 & 104.6 & 0.0051\tabularnewline
+\hline 
+ARG & 12.8 & 119.7 & 106.9 & 0.0055\tabularnewline
+\hline 
+MEX & 39.6 & 164.9 & 125.3 & 0.0052\tabularnewline
+\hline 
+CHL & 29.9 & 200.2 & 170.4 & 0.0051\tabularnewline
+\hline 
+ITA & 104.1 & 300.1 & 196.0 & 0.0055\tabularnewline
+\hline 
+\end{tabular}
+\par\end{centering}
+\caption{\label{tab:Countries-with-significant}Countries with significant
+differences in $\beta$}
+
+\end{table}
+
+Only two models, for and ISR and SRB, showed improvement in fit with
+school interventions of more than 10.
+
+Most but not all of the significant differences observed were in $\beta$
+between the base experiment contrasted with school closures. In ARG
+the difference was also signficant with respect to the difference
+in \noun{initInfect, }and in OMN the difference in $\beta$ was signficant
+with respect to the model using calibration vs. data for testing rate.
+
+It is reasonable to hypothesize that longer school closures will make
+it easier for models of them to demonstrate signficant differences.
+Figure \ref{fig:signifDiffvClosure} orders countries (left-to-right)
+based on the fraction of the modeled days had school closures in effect
+(cf. \ref{fig:countrySumm}), with blue boxes placed at 1.0 if they
+demonstrated a signficant difference in $\beta$, and zero otherwise.
+Also plotted is the cummulative fraction of countries that showed
+signficant differences at that closure level.\footnote{The many red points along the vertical axis correspond to the 30 countries
+closed during the entire period.} 
 
 \begin{figure}
 \noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/vdeep-compAll-HUN-errBar}
+\includegraphics[width=0.8\paperwidth]{figs/signifDiffVclosurePeriod}
 \par\end{centering}
-\caption{\label{fig:allCalibParam-HUN-errBar}Calibrated parameters with credible
-intervals - HUN}
+\caption{\label{fig:signifDiffvClosure} Impact of closiure period on statistical
+significance}
 \end{figure}
 
-
-\subsection{Sensitivity analysis}
-
-To test whether the KDE parameters associated with calibrated models
-were sufficient to distinguish models with and without school interventions,
-a separate set of experiments were run to replicate model predictions
-near these values. For each country, final $\beta$ and \noun{initInfect
-}values were taken (cf. Figure \ref{fig:modelComp-scatter}) and a
-small amount (1\%) noise was added to these for each of a set of replicated
-runs near these values, for models both with and without school interventions
-included. The results are shown in Figure \ref{fig:intrvnImpact},
-showing the averge number of cummulative infections (normalized by
-population) with standard deviation bars over the set of replicated
-experiments. Most countries show very low normalized infection levels
-in either case. For countries with signficant infection numbers, some
-countries (e.g., CHL) show the expected pattern of reduced infections
-with school interventions, many countries (e.g., IRN) show the opposite
-change, and many others (e.g., KWT) show that the two models cannot
-be discriminated. These differences could not be attributed to the
-number of days of school closure (cf. Figure \ref{fig:countrySumm})
-(data not shown).
+Examples of four countries (highlighted in Figure \ref{fig:signifDiffvClosure})
+are shown below. ARG is one of 30 countries that had school closures
+during the entire period modeled, and one of the four demonstrating
+a signficant difference in $\beta$. DEU showed significant difference
+even though schools there were open 68.6\% of the time. GBR schools
+were closed 52.7\% of the time, and THA schools 37.3\% of the time.
+As mentioned above, for ARG the difference in \noun{initInfect }is
+also signficant, while in DEU the value of \noun{initInfect }in models
+with/out school closure is nearly identical.
 
 \begin{figure}
 \noindent \begin{centering}
-\includegraphics[width=0.8\paperwidth]{figs/interventionImpact}
+\includegraphics[width=0.8\paperwidth]{figs/signifDiff-4examples}
 \par\end{centering}
-\caption{\label{fig:intrvnImpact}Intervention impact}
+\caption{\label{fig:signifDiffExamples} Examples of statistical significance
+in $\beta$ }
 \end{figure}
+
+
+\subsection{Difference with CMA-ES calibrated values}
+
+As discussed above, model calibration using ABC methods brings with
+it the virtue of an estimate of the the parameters found are the best
+KDE. However, other global optimization methods may be more successful
+at discovering well-fitting model parameters, without any claims regarding
+posterior estimates. The results of CMA-ES can be compared in terms
+of their discovery of better or worse model fits; this distribution
+is shown in Figure \ref{fig:cmaesVabc}. In most cases, the model
+fit using KDE parameters was about the same as using CMA-ES values.
+On average, however the pyABC calibration methods found better fitting
+model parameters, sometimes significantly better.
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[width=0.8\paperwidth]{figs/CMAESvABCFitDist}
+\par\end{centering}
+\caption{\label{fig:cmaesVabc} CMA-ES vs ABC search}
+\end{figure}
+
+The parameters of those models with better CMA-ES fit are worth comparing
+to the KDE parameters. Figure \ref{fig:cmaesAlt-KAZ} shows the example
+of KAZ which with a model fitting slightly better (difference = -21.3)
+does so with values (marked with a large X in the figure) outside
+the confidence interval associated with the KDE parameters. . Only
+11 differences of this ``semi-significant'' sort\footnote{Recall that no confidence intervals can be associated with the CMA-ES
+parameters.} are found across all countries' models, and these are listed in Table
+\ref{tab:CMA-ES-superior-fitness}.
+
+\begin{figure}
+\noindent \begin{centering}
+\includegraphics[width=0.8\paperwidth]{figs/vdeep-compAll-KAZ}
+\par\end{centering}
+\caption{\label{fig:cmaesAlt-KAZ} CMA-ES alternative - KAZ}
+\end{figure}
+
+\begin{table}
+\noindent \begin{centering}
+\begin{tabular}{|c|c|c|c|c|}
+\hline 
+ISO3 & Fit diff & param & KDE value & CMA-ES value\tabularnewline
+\hline 
+\hline 
+ARE & -12.8 & initInfect & 8760 & 2761\tabularnewline
+\hline 
+BHR & -35.5 & initInfect & 2302 & 1001\tabularnewline
+\hline 
+CAN & -22.0 & initInfect & 32197 & 49833\tabularnewline
+\hline 
+KAZ & -21.3 & beta & 0.00517 & 0.00632\tabularnewline
+\hline 
+KAZ & -21.3 & initInfect & 4035 & 1000\tabularnewline
+\hline 
+LBY & -16.3 & beta & 0.00437 & 0.00562\tabularnewline
+\hline 
+MEX & -12.1 & initInfect & 36659 & 49917\tabularnewline
+\hline 
+PSE & -12.5 & beta & 0.00161 & 0.00432\tabularnewline
+\hline 
+PSE & -12.5 & initInfect & 2428 & 1000\tabularnewline
+\hline 
+SLV & -30.8 & beta & 0.00433 & 0.00527\tabularnewline
+\hline 
+TGO & -12.6 & beta & 0.00238 & 0.00397\tabularnewline
+\hline 
+\end{tabular}
+\par\end{centering}
+\caption{\label{tab:CMA-ES-superior-fitness}CMA-ES superior fitness }
+
+\end{table}
 
 
 \section{Methods}
@@ -558,8 +688,11 @@ by a source.
 
 The specification of school closures used in these experiments was
 conservative: Only intervention periods that were identified by \emph{both}
-sources, for periods > 14 days were considered. 78 countries had school
-interventions that satisfied these criteria.
+sources, for periods of at least 14 days were considered. All countries'
+simulatons were begun on this date (between February 14 and May, 22,
+2020; cf. Figure \ref{fig:countrySumm}), interventions of some period
+(14-150 days) were applied, and all simulations were terminated at
+July 31, 2020.
 
 \subsubsection{Testing rate data}
 
@@ -640,20 +773,20 @@ and lower bounds.
 
 CMA-ES was used as one calibration outer-loop around the basic Covasim
 simulation to search for key parameter values that allow the model
-to best fit against data. Preliminary experiments across a large number
-of trials on a single country (data not shown) identified 25 generations
-of 32 individuals = 800 trials total were allocated to find the search
-for parameter values causing the model to best fit the data. Optimization
-is always over two parameters, $\beta$ and \noun{initInfect}, the
-number of initial infections. Initial search bounds for the optimization
-were set:
+to best fit against data. To make computational effort comparable
+to the approximately 8000 model evaluations used in experiments with
+\noun{pyABC}, 67 generations of 120 individuals = 8040 trials total
+were allocated to find the search for parameter values causing the
+model to best fit the data. Optimization is always over two parameters,
+$\beta$ and \noun{initInfect}, the number of initial infections.
+Initial search bounds for the optimization were set:
 \begin{itemize}
 \item \noun{initInfect}: best = 21000, lower bound =16000, upper bound=26000
 \item $\beta$: best = .005, lower bound = 0.001, upper bound=0.01
 \end{itemize}
 In the experiments described in Section \ref{subsec:dataTR}, a third
 parameter corresponding to testing rate is also included. Bounds on
-its search were established using the data for the 78 countries available:
+its search were established using the data for the 77 countries available:
 \begin{itemize}
 \item testingRate: best=3.3e-4, lower bound = 2e-6, upper bound=3e-3
 \end{itemize}
@@ -702,42 +835,86 @@ of search reducing $\epsilon_{t}$, an absolute minimum on $\epsilon_{t}$,
 etc.
 
 Figure \ref{fig:pyABC-search} gives a sense of the search performed
-by \noun{pyABC, }in this case for NZL. \ref{fig:pyABC-search}.a shows
+by \noun{pyABC, }in this case for SRB. \ref{fig:pyABC-search}.a shows
 the converging posterior estimates for $\beta$ and \noun{initInfect
-}over the generations of search, and \ref{fig:pyABC-search}.b shows
-the declining $\epsilon_{t}$ used to drive the search to better and
-better fitting models.
+}over the nine generations of search, and \ref{fig:pyABC-search}.b
+shows the declining $\epsilon_{t}$ used to drive the search to better
+and better fitting models.
 
 \begin{figure}
 \noindent \begin{centering}
-\subfloat[{\protect\includegraphics[width=0.4\paperwidth]{figs/vdeep-NZL-history}}]{
+\subfloat[Posterior history]{\includegraphics[width=0.4\paperwidth]{figs/SRB-history}
 
-} \subfloat[{\protect\includegraphics[width=0.4\paperwidth]{figs/vdeep-NZL-eps}}]{}
+}\subfloat[Epsilon convergence]{\includegraphics[width=0.4\paperwidth]{figs/SRB-epsilon}
+
+}
 \par\end{centering}
-\caption{\noun{\label{fig:pyABC-search}pyABC }search for NZL parameters}
+\caption{\noun{\label{fig:pyABC-search}pyABC }search for SRB parameters}
 \end{figure}
 
 
 \section{Conclusions}
 
-Experiments reported considered a standardized modeling approach applied
+Experiments reported consider a standardized modeling approach applied
 across a broad range of countries. The countries were selected because
 they had available data on both nation-wide school closures and testing
-rates during early, dynamic days of the pandemic in early 2020. It
-was expected that incorporating school interventions into models would
-allow them to better fit data concerning deaths and diagnoses, but
-that was not found to be the case. Similarly, it was expected than
-making use of data on testing rates within countries would lead to
-better models than assuming a constant testing rate or allowing calibration
-to set testing rates at levels that lead to better fitting models.
-While calibrated testing rates did differ considerably from data-based
-values, differences in the resulting models did lead to better fit
-with deaths and diagnosis data. A comparison of global CMA-ES optimization
-techniques to Bayesian SMC-ABC calibration showed broadly consistent
-results in the parameter values discovered by the two methods. But
-the explicit calculation of posterior probabilities allowed by the
-SMC-ABC methods suggest that none of the observed variations across
-experiments can be made with statistical confidence.
+rates during the early, dynamic days of the pandemic in early 2020
+when strategies varied widely and the impact of these interventions
+can be imagined to have large impact. It was expected that incorporating
+school interventions into models would allow them to better fit data
+concerning deaths and diagnoses, but generally that was not found
+to be the case; restricting attention to only models with statistically
+significant difference in parameters only SRB and ISR showed improved
+fitness. Similarly, it was expected than making use of data on testing
+rates within countries would lead to better models than assuming a
+constant testing rate or allowing calibration to set testing rates
+at levels that lead to better fitting models. While calibrated testing
+rates did differ considerably from data-based values, differences
+in the resulting models did not generally lead to better fit with
+deaths and diagnosis data and in only one case (OMN) lead to models
+with significantly different parameter values. 
+
+A comparison of global CMA-ES optimization techniques to Bayesian
+SMC-ABC calibration using the \noun{pyABC} library showed broadly
+consistent results in the parameter values discovered by the two methods,
+but also that \noun{pyABC} was generally even more effective at calibrating
+Covasim model parameters than CMA-ES.
+
+\subsection{Scientific sharing, publishing and open source models}
+
+\begin{quotation}
+
+Early models relied on sparse, sometimes unreliable, data, and modelers
+did not anticipate the emergence of important new facts.... For use
+in an emergency, models developed through basic research need to be
+\textquotedblleft operationalized\textquotedblright ---that is, made
+robust for evaluating specific policy interventions. \textquotedblleft Nowcasting\textquotedblright{}
+requires models that integrate incomplete, real-time data and emerging
+medical knowledge to provide situational awareness.... Models must
+also incorporate behavioral responses to policy interventions that
+may change the course of an epidemic. \cite{Press1015}
+
+\end{quotation}
+
+Traditional compartmental models represent the core of epidemiological
+prediction efforts, but become constrained as more fine-grained compartments
+are considered. Models like Covasim bring the expressive power of
+agent-based desciptions of behaviors over networks to allow evaluation
+of many varieties of intervention strategies and empirical testing
+against many data sources, but are more difficult to make statistical
+inferences about. 
+
+Well-engineered, open source codebases like Covasim and pyABC allow
+independent model components to be investigated and incorporated separately.
+Basic agent-based models can be related directly to traditional ODE
+compartmental model analogs. The publishing of full model implementation
+details, like those included with the Panovska-Griffiths publication
+\cite{jpg20} and \href{https://github.com/Jasminapg/Covid-19-Analysis}{code repository}
+provide an excellent example. Careful experimentation building from
+agent-based models may extend the results into mathematically intractable
+regimes inaccessible to simpler ODE mdels. The COVID-19 pandemic,
+and others to come, demand fast-paced scientific sharing that is catalyzed
+by such interactions.
 
 \pagebreak{}
 
