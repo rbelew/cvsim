@@ -1,10 +1,10 @@
 ''' jhu4covasim: prototype import facility of JHU GLOBAL cases, deaths and recovered data
 	for inclusion in Covasim?
 
-	country_converter used to normalize country names and provide ISO3 used as keys
-	Several nominal countries (Diamond Princess, MS Zaandam, Summer Olympics 2020) aren't
-	Currently only (non-Imperialist, see below) country data is collected
-	JHU quit publishing recovered data as of Aug 4 2021; cf https://github.com/CSSEGISandData/COVID-19/issues/4465
+	- country_converter used to normalize country names and provide ISO3 used as keys
+	- Several nominal countries (Diamond Princess, MS Zaandam, Summer Olympics 2020) aren't
+	- Only (non-Imperialist, see below) "province" country data is collected
+	- JHU quit publishing recovered data as of Aug 4 2021; cf https://github.com/CSSEGISandData/COVID-19/issues/4465
 
 	Created on Dec 6, 2021
 
@@ -20,11 +20,18 @@ import requests
 
 import country_converter as coco
 
-# to allow pickling
+# to allow pickling/JSON serialization
 def dd2dict(dd):
 	# NB: dd must use only primitive types
 	return json.loads(json.dumps(dd))
 
+
+# JHU uses the "Province/State" column both for states WITHIN a country
+# and for ~colonies/protectorates of other "ImperiaList" nations!?
+# The former are subsumed/shared by countries' stats and summed into that country's numbers
+# The latter are at great geographic distances from the "mother" country and need to be considered distinct. Skipped for now
+
+ImperiaList = ['Denmark','France','Netherlands','New Zealand','United Kingdom']
 
 def loadJHUCountry(jhuDir,verbose=False):
 	''' return mergeDict: iso3 -> date -> {metaData, data: dtype -> cumm count}
@@ -32,10 +39,10 @@ def loadJHUCountry(jhuDir,verbose=False):
 		convert country names via country_converter
 		use ISO3 as key
 		NB: skip "provinces" of ImperiaList countries
-		collect raw CUMMULATIVE statistics; converted to daily new COUNTS in addJHUCounts() 
+		collect raw CUMMULATIVE statistics; daily new COUNTS added in addJHUCounts() 
 	'''
 	
-	stats = defaultdict(lambda: defaultdict(intdd)) # ISO3 -> date -> stat -> n
+	stats = defaultdict(lambda: defaultdict(lambda: defaultdict(int))) # cnty -> date -> dtype -> n
 	skipped = defaultdict(list)
 	prevISO3 = ''
 	for dtype in JHU_dataTypes:
@@ -77,9 +84,9 @@ def loadJHUCountry(jhuDir,verbose=False):
 					sdateStr = None
 				
 				cumm = int(entry[k])
+				# NB: maintain SPARSE stats only
 				if cumm > 0:
-					
-					# NB: maintain SPARSE stats only
+					# NB: for non-ImperiaList lines, ADD sub-region to country total					
 					stats[cnty][sdateStr][dtype] += cumm
 
 		print(f'loadJHUCountry: ALL {dtype} done')
@@ -152,28 +159,34 @@ def addJHUCounts(jhuMrg):
 		cinfo = jhuMrg[iso3]
 		cummData = cinfo['data']
 		counts = {}
+		negCount = defaultdict(int)
 		allDates = sorted(list(cummData.keys()))
 		for di,sdate in enumerate(allDates):
 			if di==0:
 				counts[sdate] = cummData[sdate].copy()
 				continue
 			prevDate = allDates[di-1]
+			
 			# NB: negative counts disallowed			
-			counts[sdate] = {dtype: max(0., (cummData[sdate][dtype] - cummData[prevDate][dtype])) for dtype in JHU_dataTypes}
+# 			counts[sdate] = {dtype: max(0., (cummData[sdate][dtype] - cummData[prevDate][dtype])) for dtype in JHU_dataTypes}
+			for dtype in JHU_dataTypes:
+				newCase = cummData[sdate][dtype] - cummData[prevDate][dtype]
+				if newCase < 0:
+					negCount[dtype] += 1
+					newCase = 0.
+				
 # 				
 # 				'cases': max(0., (cummData[sdate]['cases'] - cummData[prevDate]['cases'])), 
 # 							'deaths': max(0., (cummData[sdate]['deaths'] - cummData[prevDate]['deaths'])), 
 # 							'recover': max(0., (cummData[sdate]['recover'] - cummData[prevDate]['recover']))}
 		cinfo['counts'] = counts
 		update[iso3] = cinfo
+		for dtype in JHU_dataTypes:
+			if negCount[dtype] > 0:
+				print(f'addJHUCounts: {iso3} has {negCount[dtype]} negative change in {dtype} cumm stats?')
 	return update
 
 
-# JHU uses the "Province/State" column both for states WITHIN a country
-# and for ~colonies/protectorates of other nations!?
-# The former are subsumed/shared by countries' stats, while the latter
-# are at great geographic distances and need to be considered distinct
-ImperiaList = ['Denmark','France','Netherlands','New Zealand','United Kingdom']
 JHU_dataTypes = ['confirmed', 'deaths', 'recovered']
 
 if __name__ == '__main__':
@@ -186,14 +199,14 @@ if __name__ == '__main__':
 		print(f'creating new directory {JHUDataDir}')
 		os.mkdir(JHUDataDir)
 		
-	for dtype in JHU_dataTypes:
-		fullURL = JHU_git_root + JHU_fileTemplate % dtype
-		response = requests.get(fullURL)
-		content = response.content.decode('iso-8859-1')
-		outs = open(JHUDataDir+f'{dtype}.csv','w')
-		outs.write(content)
-		outs.close()
-		print(f'{dtype} retrieved')
+# 	for dtype in JHU_dataTypes:
+# 		fullURL = JHU_git_root + JHU_fileTemplate % dtype
+# 		response = requests.get(fullURL)
+# 		content = response.content.decode('iso-8859-1')
+# 		outs = open(JHUDataDir+f'{dtype}.csv','w')
+# 		outs.write(content)
+# 		outs.close()
+# 		print(f'{dtype} retrieved')
 	
 	outs = open(JHUDataDir+'README.txt','w')
 	now = datetime.now()
@@ -202,7 +215,10 @@ if __name__ == '__main__':
 	outs.close()
 
 	jhuDict = loadJHUCountry(JHUDataDir,verbose=True)
-
+	
+# 	jhuJSONTMPFile = JHUDataDir + 'jhuDataTMP.json'
+# 	jhuDict = json.load(open(jhuJSONTMPFile))
+	
 	jhuDict2 = addJHUCounts(jhuDict)
 	
 	jhuJSONFile = JHUDataDir + 'jhuData.json'
